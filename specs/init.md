@@ -16,13 +16,13 @@ Build a Melvor Idle mod that lets players experiment with different loadouts and
 
 ## Core Features
 
-| Feature | Status | Description |
-|---|---|---|
-| Character import | **Blocked** | Pull current loadout, bonuses, mastery levels, agility setup, potions, prayers, pets, and shop purchases from live game state. |
-| Loadout editing | Gap | Override imported values to experiment with hypothetical setups: swap equipment, toggle potions, change agility obstacles. |
-| All-targets comparison | Gap | Single-screen table showing every thieving NPC with derived XP/hr and GP/hr for the active loadout configuration. |
-| Per-target detail | Gap | Drill into an individual NPC to see loot table breakdown, success rate, stun impact, and drop confidence intervals. |
-| GP/hr with synergies | Gap | Account for special setups like summoning synergies (e.g., item-to-GP conversion at x15 multiplier) in gold calculations. |
+| Feature                | Status      | Description                                                                                                                    |
+| ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Character import       | **Blocked** | Pull current loadout, bonuses, mastery levels, agility setup, potions, prayers, pets, and shop purchases from live game state. |
+| Loadout editing        | Gap         | Override imported values to experiment with hypothetical setups: swap equipment, toggle potions, change agility obstacles.     |
+| All-targets comparison | Gap         | Single-screen table showing every thieving NPC with derived XP/hr and GP/hr for the active loadout configuration.              |
+| Per-target detail      | Gap         | Drill into an individual NPC to see loot table breakdown, success rate, stun impact, and drop confidence intervals.            |
+| GP/hr with synergies   | Gap         | Account for special setups like summoning synergies (e.g., item-to-GP conversion at x15 multiplier) in gold calculations.      |
 
 ---
 
@@ -96,17 +96,18 @@ Three layers:
 
 ## Open Tasks
 
-| Task | Status | Notes |
-|---|---|---|
+| Task                               | Status      | Notes                                                                                                                               |
+| ---------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
 | Study combat simulator source code | **Blocked** | Prerequisite for everything. Understand how it reads character state, models mechanics, and builds UI. De-risks the entire project. |
-| Inventory accessible APIs | **Blocked** | After studying combat sim: catalog which character state fields are accessible via modding API vs. internal game objects. |
-| Map thieving formulas | Gap | Extract success rate, XP, stun, and loot calculations from game source or wiki. Document modifier stacking order. |
-| Define UI wireframes | Gap | Commit to exact columns for comparison table. Decide configuration panel layout. Keep scope small. |
-| Build state reader | Gap | Implement character state import. Depends on API inventory. |
-| Build calculation engine | Gap | Pure functions: loadout config in, per-NPC metrics out. Testable independently of the game. |
-| Build UI | Gap | Comparison table, config panel, per-target detail view. |
-| Set up dev/test loop | Gap | Establish a way to load the mod into the game with a save file that has varied mastery levels for realistic testing. |
-| Create `assets/style.css` | Ready | Referenced in manifest but doesn't exist yet. Needed before any UI work. |
+| Inventory accessible APIs          | **Blocked** | After studying combat sim: catalog which character state fields are accessible via modding API vs. internal game objects.           |
+| Map thieving formulas              | **Done**    | See `specs/formulas.md` — all formulas, modifier stacking, and mechanic details extracted from wiki.                                |
+| Catalog NPC/area data              | **Done**    | See `specs/npc-data.md` — all NPC stats, area assignments, and unique drops for both realms.                                        |
+| Define UI wireframes               | Gap         | Commit to exact columns for comparison table. Decide configuration panel layout. Keep scope small.                                  |
+| Build state reader                 | Gap         | Implement character state import. Depends on API inventory.                                                                         |
+| Build calculation engine           | Gap         | Pure functions: loadout config in, per-NPC metrics out. Testable independently of the game.                                         |
+| Build UI                           | Gap         | Comparison table, config panel, per-target detail view.                                                                             |
+| Set up dev/test loop               | Gap         | Establish a way to load the mod into the game with a save file that has varied mastery levels for realistic testing.                |
+| Create `assets/style.css`          | Ready       | Referenced in manifest but doesn't exist yet. Needed before any UI work.                                                            |
 
 ---
 
