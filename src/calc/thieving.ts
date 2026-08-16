@@ -1,43 +1,60 @@
 import { boundValue } from '../utils/number-utils';
 import {
   BASE_INTERVAL_MS,
-  BASE_STUN_INTERVAL_MS,
+  BASE_STUN_DURATION_MS,
   MIN_INTERVAL_MS,
   MS_PER_HOUR,
 } from './constants';
 import type { ThievingBoosts, ThievingResult, ThievingTarget } from './types';
 
-/**
- * Calculates the success rate for a thieving action.
- *
- * @param {ThievingTarget} target The target being thieved.
- * @param {ThievingBoosts} boosts The boosts applied to the thieving action.
- * @returns {number} The success rate as a percentage.
- */
+// success_rate = min(1, (100 + stealth) / (100 + perception))
 export function calcSuccessRate(
   target: ThievingTarget,
   boosts: ThievingBoosts,
 ): number {
-  const pickpocket = boundValue(
-    Math.floor((boosts.stealth / target.perception) * 100),
-    0,
-    100,
+  return Math.min(1, (100 + boosts.stealth) / (100 + target.perception));
+}
+
+// effective_interval = max(base - flat_reductions, minimum) * (1 - pct_reduction / 100)
+export function calcEffectiveInterval(boosts: ThievingBoosts): number {
+  const afterFlat = Math.max(
+    BASE_INTERVAL_MS - boosts.flatIntervalReductionMs,
+    MIN_INTERVAL_MS,
   );
-
-  return boundValue(pickpocket + boosts.sleightOfHand, 0, 100);
+  return afterFlat * (1 - boosts.percentIntervalReduction / 100);
 }
 
-export function calcActionInterval(boosts: ThievingBoosts): number {
-  const modified =
-    Math.floor(BASE_INTERVAL_MS * (1 + boosts.intervalPercent / 100)) +
-    boosts.flatIntervalMs;
-  return Math.max(MIN_INTERVAL_MS, modified);
-}
-
-export function calcStunInterval(boosts: ThievingBoosts): number {
+export function calcStunDuration(boosts: ThievingBoosts): number {
   return Math.max(
     0,
-    Math.floor(BASE_STUN_INTERVAL_MS * (1 + boosts.stunIntervalPercent / 100)),
+    BASE_STUN_DURATION_MS * (1 - boosts.percentStunDurationReduction / 100),
+  );
+}
+
+// double_chance = min(1, stealth / (4 * perception) + additional / 100)
+export function calcDoubleChance(
+  target: ThievingTarget,
+  boosts: ThievingBoosts,
+): number {
+  const stealthBased = boosts.stealth / (4 * target.perception);
+  return Math.min(1, stealthBased + boosts.additionalDoublePercent / 100);
+}
+
+// unique_chance = (100 + stealth) / (10000 * perception)
+export function calcNpcUniqueChance(
+  target: ThievingTarget,
+  boosts: ThievingBoosts,
+): number {
+  return (100 + boosts.stealth) / (10_000 * target.perception);
+}
+
+export function calcAreaUniqueChance(
+  baseChance: number,
+  boosts: ThievingBoosts,
+): number {
+  return (
+    baseChance * (1 + boosts.percentAreaUniqueBonus / 100) +
+    boosts.flatAreaUniqueBonus
   );
 }
 
@@ -45,7 +62,17 @@ export function calcXpPerAction(
   target: ThievingTarget,
   boosts: ThievingBoosts,
 ): number {
-  return target.baseXp * (1 + boosts.xpPercent / 100);
+  return target.baseExperience * (1 + boosts.percentXpBonus / 100);
+}
+
+// avg_currency = (min + max) / 2 * (1 + currency_bonus / 100)
+export function calcAvgCurrencyPerSuccess(
+  target: ThievingTarget,
+  boosts: ThievingBoosts,
+): number {
+  const avgBase =
+    (target.currencyRange.min + target.currencyRange.max) / 2;
+  return avgBase * (1 + boosts.percentCurrencyBonus / 100);
 }
 
 export function calcThieving(
@@ -53,31 +80,35 @@ export function calcThieving(
   boosts: ThievingBoosts,
 ): ThievingResult {
   const successRate = calcSuccessRate(target, boosts);
-  const actionIntervalMs = calcActionInterval(boosts);
-  const stunIntervalMs = calcStunInterval(boosts);
+  const effectiveIntervalMs = calcEffectiveInterval(boosts);
+  const effectiveStunDurationMs = calcStunDuration(boosts);
   const xpPerAction = calcXpPerAction(target, boosts);
+  const doubleChance = calcDoubleChance(target, boosts);
+  const npcUniqueChance = calcNpcUniqueChance(target, boosts);
 
-  const pSuccess = successRate / 100;
-  const pStun =
-    (1 - pSuccess) *
-    (1 - boundValue(boosts.stunAvoidancePercent, 0, 100) / 100);
+  const stunAvoidance = boundValue(boosts.stunAvoidancePercent / 100, 0, 1);
+  const pStun = (1 - successRate) * (1 - stunAvoidance);
+  const expectedTimePerAction =
+    effectiveIntervalMs + pStun * effectiveStunDurationMs;
+  const actionsPerHour = MS_PER_HOUR / expectedTimePerAction;
+  const successfulActionsPerHour = actionsPerHour * successRate;
 
-  const expectedTimePerAttempt = actionIntervalMs + pStun * stunIntervalMs;
-  const attemptsPerHour = MS_PER_HOUR / expectedTimePerAttempt;
-  const effectiveXpPerHour = attemptsPerHour * pSuccess * xpPerAction;
+  const xpPerHour = successfulActionsPerHour * xpPerAction;
+
+  const avgCurrencyPerSuccess = calcAvgCurrencyPerSuccess(target, boosts);
+  const currencyPerHour =
+    successfulActionsPerHour * avgCurrencyPerSuccess * (1 + doubleChance);
 
   return {
     successRate,
-    actionIntervalMs,
-    stunIntervalMs,
+    effectiveIntervalMs,
+    effectiveStunDurationMs,
+    doubleChance,
+    npcUniqueChance,
     xpPerAction,
-    effectiveXpPerHour,
+    actionsPerHour,
+    successfulActionsPerHour,
+    xpPerHour,
+    currencyPerHour,
   };
-}
-
-export function calcMasteryXpPerAction(
-  target: ThievingTarget,
-  boosts: ThievingBoosts,
-): void {
-  // TODO:
 }
