@@ -115,21 +115,16 @@ Three layers:
 
 **Critical:** The entire plan assumes the Melvor modding API exposes enough character state to import loadouts. If the combat simulator achieves this through fragile hacks (monkey-patching, accessing private internals), the approach may break across game updates. This risk is resolved by studying the combat simulator source.
 
-**Moderate:** The `melvor-types` community package may not cover all APIs needed. Type definitions give signatures, not behavior -- runtime testing against the actual game is required.
+**Moderate:** The imported `types` may not cover all APIs needed, as the latest version only supports up to game version v1.2.0. Also, type definitions give signatures, not behavior -- runtime testing against the actual game is required.
 
 **Low:** Wiki-sourced formulas may diverge from actual game logic. Acceptable given the accuracy tolerance, but specific edge cases (modifier stacking order, stun/potion interactions) should be validated against game source when possible.
 
 ---
 
-## Non-Goals
+## Out-of-scope
 
 - Pixel-perfect reproduction of the combat simulator's UI complexity
 - Simulation-based approach (running N iterations) -- deterministic formula evaluation is sufficient
 - Offline/standalone version -- this is an in-game mod only
 - Support for non-thieving skills
 
----
-
-## Next Step
-
-Locate and study the Melvor Combat Simulator mod source code. Specifically answer: how does it read equipped items, active modifiers, and mastery data from the game? What patterns does it use for UI injection? Document findings, then revisit this spec to fill in the **Blocked** items.
