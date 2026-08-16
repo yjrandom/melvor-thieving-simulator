@@ -6,12 +6,12 @@ Derived from `constitution.md` and actual project state as of 2026-08-16.
 
 ## Legend
 
-| Symbol | Meaning |
-| ------ | ------------------------------------------- |
-| Done | Implemented and working |
+| Symbol  | Meaning                                    |
+| ------- | ------------------------------------------ |
+| Done    | Implemented and working                    |
 | Partial | Started but incomplete or has known issues |
-| Ready | Dependencies met, can start now |
-| Blocked | Waiting on another task |
+| Ready   | Dependencies met, can start now            |
+| Blocked | Waiting on another task                    |
 
 ---
 
@@ -20,26 +20,29 @@ Derived from `constitution.md` and actual project state as of 2026-08-16.
 Things that are broken or missing but block all forward progress.
 
 ### 0.1 Fix Jest configuration
-**Status:** Ready
+
+**Status:** Done
 **Why:** Tests pass on `.ts` source via SWC but Jest also picks up compiled `.js` files from `dist/` which crash on ESM imports. `@swc/jest` is installed but no `jest.config` wires it up properly. Test infrastructure must work before adding calc engine tests.
 
-- [ ] Add `jest.config.ts` (or `.js`) with SWC transform
-- [ ] Exclude `dist/` and `node_modules/` from test roots
-- [ ] Verify `pnpm test` passes cleanly
+- [x] Add `jest.config.ts` (or `.js`) with SWC transform
+- [x] Exclude `dist/` and `node_modules/` from test roots
+- [x] Verify `pnpm test` passes cleanly
 
 ### 0.2 Create `assets/style.css`
-**Status:** Ready
+
+**Status:** Done
 **Why:** `manifest.json` references `assets/style.css` in the `load` array. The mod will fail to load without it. Empty file is fine until UI work begins.
 
-- [ ] Create empty `assets/style.css`
+- [x] Create empty `assets/style.css`
 
 ### 0.3 Wire up `setup.mts` scaffold
-**Status:** Ready
+
+**Status:** Done
 **Why:** Entry point is `console.log('Hello World!')`. Needs lifecycle hooks so the mod actually initializes. No functionality yet, just the skeleton.
 
-- [ ] Register `ctx.onCharacterLoaded` callback
-- [ ] Register `ctx.onInterfaceReady` callback
-- [ ] Import and call `readTargets` / `readAreas` in `onCharacterLoaded` to verify data flows
+- [x] Register `ctx.onCharacterLoaded` callback
+- [x] Register `ctx.onInterfaceReady` callback
+- [x] Import and call `readTargets` / `readAreas` in `onCharacterLoaded` to verify data flows
 
 ---
 
@@ -53,6 +56,7 @@ Two distinct layers:
 Initial scope: **read-only import of current loadout** (no hypothetical overrides yet).
 
 ### 1.1 Define loadout types
+
 **Status:** Ready
 **Why:** Need a type representing a complete loadout — everything that affects thieving outcomes. This is the contract between the loadout layer and the boost aggregator.
 
@@ -61,6 +65,7 @@ Initial scope: **read-only import of current loadout** (no hypothetical override
 - [ ] Keep it a plain data object — no game types, no classes
 
 ### 1.2 Build loadout reader (current state only)
+
 **Status:** Blocked on 1.1
 **Why:** Must extract the player's current loadout from the game's live objects (`game.combat.player`, `game.potions`, `game.agility`, `game.astrology`, `game.modifiers`, etc.). This is the untested part — requires runtime validation against the actual game.
 
@@ -77,6 +82,7 @@ Initial scope: **read-only import of current loadout** (no hypothetical override
 - [ ] Read thieving skill level and abyssal skill level
 
 ### 1.3 Build boost aggregator
+
 **Status:** Blocked on 1.1
 **Why:** Pure function that converts a `ThievingLoadout` + per-NPC context into a `ThievingBoosts` object. This is where the modifier stacking logic lives. Standalone module (`calc/aggregator.ts`), no game dependency.
 
@@ -93,6 +99,7 @@ Initial scope: **read-only import of current loadout** (no hypothetical override
 - [ ] Handle realm-specific modifier gating (Melvor vs Abyssal)
 
 ### 1.4 Unit tests for boost aggregation
+
 **Status:** Blocked on 0.1, 1.1, 1.3
 **Why:** The aggregator is the most bug-prone part of the system — complex stacking rules, realm-specific gating, and many edge cases. Must be tested independently of the game.
 
@@ -109,6 +116,7 @@ Initial scope: **read-only import of current loadout** (no hypothetical override
 The calc engine (`src/calc/thieving.ts`) implements the core formulas. It needs tests and coverage for edge cases.
 
 ### 2.1 Unit tests for calc engine
+
 **Status:** Blocked on 0.1
 **Why:** `calcThieving` and its component functions have zero test coverage. The formulas are documented in `formulas.md` — tests should verify against the worked examples there.
 
@@ -122,6 +130,7 @@ The calc engine (`src/calc/thieving.ts`) implements the core formulas. It needs 
 - [ ] Test stun avoidance integration in `calcThieving` — verify it reduces effective stun rate
 
 ### 2.2 Summoning synergy support in boost aggregator
+
 **Status:** Blocked on 1.3
 **Why:** `formulas.md` documents ~18 synergies. Some change GP calculation fundamentally (Leprechaun + Monkey auto-sell, Leprechaun + Devil gamble). The calc engine stays synergy-unaware — all synergy effects are resolved in the boost aggregator and expressed as `ThievingBoosts` fields before reaching the calculator.
 
@@ -138,6 +147,7 @@ The calc engine (`src/calc/thieving.ts`) implements the core formulas. It needs 
 Without this, the mod is a read-only stats viewer — not a simulator. Deferred from Phase 1 to ship a working read-only version first.
 
 ### 3.1 Define loadout override type
+
 **Status:** Blocked on 1.1
 **Why:** Need a type representing user overrides on top of imported state. Must support partial overrides (change one piece of equipment, leave the rest imported).
 
@@ -145,6 +155,7 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 - [ ] Implement merge function: `applyOverrides(imported: ThievingLoadout, overrides: LoadoutOverrides): ThievingLoadout`
 
 ### 3.2 Equipment override logic
+
 **Status:** Blocked on 3.1
 **Why:** Players want to swap equipment slots and see how XP/hr changes. Need to know which equipment slots are thieving-relevant and their modifier effects.
 
@@ -152,6 +163,7 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 - [ ] Implement equipment swap in override merge
 
 ### 3.3 Potion / Prayer / Agility toggles
+
 **Status:** Blocked on 3.1
 **Why:** Simpler overrides — on/off toggles or tier selection rather than full equipment management.
 
@@ -165,6 +177,7 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 ## Phase 4 — UI
 
 ### 4.1 Comparison table (primary screen)
+
 **Status:** Blocked on 1.3, 2.1
 **Why:** Core deliverable. A table of all thieving NPCs showing XP/hr, GP/hr, success rate for the active loadout. Requires working boost aggregation and calc engine.
 
@@ -175,6 +188,7 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 - [ ] Style with `assets/style.css`
 
 ### 4.2 Configuration panel
+
 **Status:** Blocked on 3.1
 **Why:** Import button + override controls. Where the user selects hypothetical loadouts.
 
@@ -187,6 +201,7 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 - [ ] "Reset to imported" button
 
 ### 4.3 Per-target detail view
+
 **Status:** Blocked on 4.1
 **Why:** Secondary screen. Drill into one NPC to see loot table, drop confidence intervals, mastery progress estimate. Lower priority than comparison table.
 
@@ -200,6 +215,7 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 ## Phase 5 — Dev/Test Loop & Polish
 
 ### 5.1 Dev environment setup
+
 **Status:** Ready
 **Why:** Need a way to load the mod into the game with a save file that has varied mastery levels. Without this, runtime testing is guesswork.
 
@@ -208,6 +224,7 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 - [ ] Establish a quick reload cycle (change code → compile → reload mod)
 
 ### 5.2 Runtime validation
+
 **Status:** Blocked on 1.2, 5.1
 **Why:** Type definitions give API shapes but not behavior. Must verify that `readLoadout` actually returns correct values by comparing mod output against known in-game state.
 

@@ -6,16 +6,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Melvor Idle mod that simulates thieving outcomes for different loadouts, letting players compare XP/hr and GP/hr across all thieving NPCs without switching gear in-game. Built against the official Melvor modding API.
 
-The project is in early stages — `src/setup.mts` is a scaffold and the spec in `specs/init.md` is the design document.
+The project is in early stages — `src/setup.mts` is a scaffold and the spec in `specs/constitution.md` is the design document.
 
-## Build
+## Build & Test
 
 ```bash
 pnpm install
 pnpm exec tsc          # compiles src/ → dist/
+pnpm test              # runs Jest with SWC transform
 ```
 
-No test runner is configured yet. No linter.
+No linter configured.
 
 ## Architecture (Planned)
 
@@ -33,7 +34,7 @@ The mod entry point is `src/setup.mts`, exported as `setup(ctx: Modding.ModConte
 - `specs/constitution.md` — full design spec with feature list, mechanics to model, and open tasks
 - `specs/formulas.md` — thieving formulas and mechanics reference (interval, stealth, success rate, doubling, loot, synergies)
 - `specs/npc-data.md` — complete NPC stats and area data for both Melvor and Abyssal realms
-- `types/game-types/` — Melvor game type definitions from `melvor-types` (community package, installed via GitHub)
+- `types/game-types/` — Melvor game type definitions (manually imported from the Melvor Typing Project)
 - `types/game-types/mod.d.ts` — modding API types (`Modding.ModContext`, lifecycle hooks)
 - `types/game-types/thieving2.d.ts` — thieving skill types
 - `types/game-types/game.d.ts` — root `Game` class types
@@ -41,12 +42,17 @@ The mod entry point is `src/setup.mts`, exported as `setup(ctx: Modding.ModConte
 ## TypeScript
 
 - Strict mode enabled with `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`
-- Module system: `nodenext` with `verbatimModuleSyntax` — use explicit `.mts` extensions and `import type` syntax
+- Module system: `esnext` with `verbatimModuleSyntax` — use explicit `.mts` extensions and `import type` syntax
 - Target: `esnext`
 
 ## Melvor Modding Conventions
 
 - The mod registers via `export function setup(ctx: Modding.ModContext)` in the entry file
 - Lifecycle hooks: `ctx.onCharacterLoaded`, `ctx.onInterfaceReady`, etc. — character data is only available after `characterLoaded`
-- Game globals like `game` (the `Game` instance) are available at runtime but not typed in the project's own source — access them through the modding API or cast from `globalThis`
-- The `melvor-types` package provides type definitions but not runtime behavior — runtime testing against the actual game is required
+- Game globals like `game` (the `Game` instance) are available at runtime and typed via `types/` — use them directly, no casts needed
+- Type definitions in `types/` provide shapes but not runtime behavior — runtime testing against the actual game is required
+
+## Workflow
+
+- `specs/constitution.md` is the design spec — consult it for feature scope, mechanics to model, and architectural decisions.
+- `specs/tasks.md` tracks all planned work, derived from the constitution. When completing a task, update its status to Done and check its boxes (`[ ]` → `[x]`).
