@@ -57,33 +57,33 @@ Initial scope: **read-only import of current loadout** (no hypothetical override
 
 ### 1.1 Define loadout types
 
-**Status:** Ready
+**Status:** Done
 **Why:** Need a type representing a complete loadout — everything that affects thieving outcomes. This is the contract between the loadout layer and the boost aggregator.
 
-- [ ] Define `ThievingLoadout` interface in `calc/types.ts`
-- [ ] Fields for: equipped items (by slot), mastery levels (per NPC ID), mastery pool percentages (melvor + abyssal), active potion (id + tier), active prayers, agility obstacles + pillar, astrology modifiers (Ko constellation), active pets, relevant shop purchases, active summoning familiars/synergy, skill level, abyssal skill level
-- [ ] Keep it a plain data object — no game types, no classes
+- [x] Define `ThievingLoadout` interface in `calc/types.ts`
+- [x] Fields for: equipped items (by slot), mastery levels (per NPC ID), mastery pool percentages (melvor + abyssal), active potion (id + tier), active prayers, agility obstacles + pillar, astrology modifiers (Ko constellation), active pets, relevant shop purchases, active summoning familiars/synergy, skill level, abyssal skill level
+- [x] Keep it a plain data object — no game types, no classes
 
 ### 1.2 Build loadout reader (current state only)
 
-**Status:** Blocked on 1.1
+**Status:** Done
 **Why:** Must extract the player's current loadout from the game's live objects (`game.combat.player`, `game.potions`, `game.agility`, `game.astrology`, `game.modifiers`, etc.). This is the untested part — requires runtime validation against the actual game.
 
-- [ ] Implement `readLoadout(game: Game): ThievingLoadout` in `state/reader.ts`
-- [ ] Read equipped items relevant to thieving (by slot ID, not by effect — the aggregator interprets effects)
-- [ ] Read mastery levels per NPC and mastery pool percentages (both realms)
-- [ ] Read active potion (Gentle Hands / Silent Thief — id and tier)
-- [ ] Read active prayers
-- [ ] Read agility course obstacles and pillar effects
-- [ ] Read astrology (Ko constellation) modifiers
-- [ ] Read active pets
-- [ ] Read relevant shop purchases
-- [ ] Read active summoning familiars and synergy
-- [ ] Read thieving skill level and abyssal skill level
+- [x] Implement `readLoadout(game: Game): ThievingLoadout` in `state/reader.ts`
+- [x] Read equipped items relevant to thieving (by slot ID, not by effect — the aggregator interprets effects)
+- [x] Read mastery levels per NPC and mastery pool percentages (both realms)
+- [x] Read active potion (Gentle Hands / Silent Thief — id and tier)
+- [x] Read active prayers
+- [x] Read agility course obstacles and pillar effects
+- [x] Read astrology (Ko constellation) modifiers
+- [x] Read active pets
+- [x] Read relevant shop purchases
+- [x] Read active summoning familiars and synergy
+- [x] Read thieving skill level and abyssal skill level
 
 ### 1.3 Build boost aggregator
 
-**Status:** Blocked on 1.1
+**Status:** Ready
 **Why:** Pure function that converts a `ThievingLoadout` + per-NPC context into a `ThievingBoosts` object. This is where the modifier stacking logic lives. Standalone module (`calc/aggregator.ts`), no game dependency.
 
 - [ ] Implement `aggregateBoosts(loadout: ThievingLoadout, target: ThievingTarget): ThievingBoosts`
@@ -100,7 +100,7 @@ Initial scope: **read-only import of current loadout** (no hypothetical override
 
 ### 1.4 Unit tests for boost aggregation
 
-**Status:** Blocked on 0.1, 1.1, 1.3
+**Status:** Blocked on 1.3
 **Why:** The aggregator is the most bug-prone part of the system — complex stacking rules, realm-specific gating, and many edge cases. Must be tested independently of the game.
 
 - [ ] Test stealth stacking from multiple sources

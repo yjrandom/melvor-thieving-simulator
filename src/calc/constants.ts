@@ -19,3 +19,4 @@ export const DEFAULT_BOOSTS: ThievingBoosts = {
   percentAreaUniqueBonus: 0,
   flatAreaUniqueBonus: 0,
 };
+
