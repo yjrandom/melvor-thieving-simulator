@@ -1,5 +1,8 @@
 # Melvor Thieving Simulator
 
+> [!WARNING] 
+> Work-in-Progress
+
 A [Melvor Idle](https://melvoridle.com/) mod that simulates thieving outcomes for different loadouts, letting you compare XP/hr and GP/hr across all thieving NPCs without switching gear in-game.
 
 ## Features
