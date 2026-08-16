@@ -18,7 +18,7 @@ Build a Melvor Idle mod that lets players experiment with different loadouts and
 
 | Feature                | Status      | Description                                                                                                                    |
 | ---------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| Character import       | **Blocked** | Pull current loadout, bonuses, mastery levels, agility setup, potions, prayers, pets, and shop purchases from live game state. |
+| Character import       | **Ready**   | Pull current loadout, bonuses, mastery levels, agility setup, potions, prayers, pets, and shop purchases from live game state via `game` global. |
 | Loadout editing        | Gap         | Override imported values to experiment with hypothetical setups: swap equipment, toggle potions, change agility obstacles.     |
 | All-targets comparison | Gap         | Single-screen table showing every thieving NPC with derived XP/hr and GP/hr for the active loadout configuration.              |
 | Per-target detail      | Gap         | Drill into an individual NPC to see loot table breakdown, success rate, stun impact, and drop confidence intervals.            |
@@ -79,8 +79,15 @@ Expanded view for a single NPC. Loot table with drop rates, confidence intervals
 
 - Melvor Idle mod via the official modding API
 - TypeScript, compiled to JS (`dist/setup.mjs`)
-- Type definitions from `melvor-types` (community package)
+- Type definitions from `melvor-typing-project` (manually imported community package) — see `types/` below
 - UI injected into the game's interface via mod context
+
+### Type definitions (`types/`)
+
+Imported from the [Melvor Typing Project](https://github.com/GamesByMalcsPtyLtd/Melvor-Typing-Project/). Generated from the game's source code, though currently only verified up to game version V1.2. Two subdirectories:
+
+- **`game-types/`** — type definitions for game internals: skills, items, combat, modding API, UI components, etc. These define the shape of runtime globals like `game`, `thievingMenu`, and the `Modding.ModContext` lifecycle.
+- **`library-types/`** — type definitions for third-party libraries the game exposes as globals (e.g., Tippy.js, SweetAlert, Sortable, Pixi.js, petite-vue, Fuse.js). Available for use in mod UI code without bundling.
 
 ### Architecture
 
@@ -98,8 +105,8 @@ Three layers:
 
 | Task                               | Status      | Notes                                                                                                                               |
 | ---------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Study combat simulator source code | **Blocked** | Prerequisite for everything. Understand how it reads character state, models mechanics, and builds UI. De-risks the entire project. |
-| Inventory accessible APIs          | **Blocked** | After studying combat sim: catalog which character state fields are accessible via modding API vs. internal game objects.           |
+| Study combat simulator source code | **Resolved** | Game types confirm character state is accessible via the `game` global — no need to reverse-engineer the combat simulator's approach. Still useful as UI reference. |
+| Inventory accessible APIs          | **Resolved** | Key APIs identified: `game.thieving`, `game.combat.player`, `game.potions`, `game.agility`, `game.astrology`, `game.modifiers`. All available after `ctx.onCharacterLoaded`. |
 | Map thieving formulas              | **Done**    | See `specs/formulas.md` — all formulas, modifier stacking, and mechanic details extracted from wiki.                                |
 | Catalog NPC/area data              | **Done**    | See `specs/npc-data.md` — all NPC stats, area assignments, and unique drops for both realms.                                        |
 | Define UI wireframes               | Gap         | Commit to exact columns for comparison table. Decide configuration panel layout. Keep scope small.                                  |
@@ -113,7 +120,7 @@ Three layers:
 
 ## Risks
 
-**Critical:** The entire plan assumes the Melvor modding API exposes enough character state to import loadouts. If the combat simulator achieves this through fragile hacks (monkey-patching, accessing private internals), the approach may break across game updates. This risk is resolved by studying the combat simulator source.
+**Critical (Resolved):** The `game` global exposes character state directly — `game.thieving`, `game.combat.player`, `game.modifiers`, etc. No fragile hacks needed. The `melvor-types` package provides type coverage for these APIs.
 
 **Moderate:** The imported `types` may not cover all APIs needed, as the latest version only supports up to game version v1.2.0. Also, type definitions give signatures, not behavior -- runtime testing against the actual game is required.
 
