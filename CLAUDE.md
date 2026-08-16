@@ -31,6 +31,8 @@ The mod entry point is `src/setup.mts`, exported as `setup(ctx: Modding.ModConte
 
 - `manifest.json` — Melvor mod manifest (namespace: `melvorThievingSimulator`)
 - `specs/init.md` — full design spec with feature list, mechanics to model, and open tasks
+- `specs/formulas.md` — thieving formulas and mechanics reference (interval, stealth, success rate, doubling, loot, synergies)
+- `specs/npc-data.md` — complete NPC stats and area data for both Melvor and Abyssal realms
 - `types/game-types/` — Melvor game type definitions from `melvor-types` (community package, installed via GitHub)
 - `types/game-types/mod.d.ts` — modding API types (`Modding.ModContext`, lifecycle hooks)
 - `types/game-types/thieving2.d.ts` — thieving skill types
