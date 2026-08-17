@@ -1,6 +1,4 @@
 {
-  "namespace": "melvorThievingSimulator",
-  "icon": "assets/icon.png",
-  "setup": "dist/setup.mjs",
-  "load": ["assets/style.css"]
+  "namespace": "thievingSimulator",
+  "setup": "setup.mjs"
 }

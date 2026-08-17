@@ -1,22 +1,22 @@
 import type {
-    ActivePotionInfo,
-    ActivePrayerInfo,
-    AgilityObstacleInfo,
-    AgilityPillarInfo,
-    AstrologyModifierInfo,
-    EquippedItemEntry,
-    LootItem,
-    PetInfo,
-    ShopPurchaseInfo,
-    SummoningSynergyInfo,
-    ThievingArea,
-    ThievingLoadout,
-    ThievingTarget,
+  ActivePotionInfo,
+  ActivePrayerInfo,
+  AgilityObstacleInfo,
+  AgilityPillarInfo,
+  AstrologyModifierInfo,
+  EquippedItemEntry,
+  LootItem,
+  PetInfo,
+  ShopPurchaseInfo,
+  SummoningSynergyInfo,
+  ThievingArea,
+  ThievingLoadout,
+  ThievingTarget,
 } from '../calc/types';
 import {
-    RealmName,
-    ThievingEquipmentSlotId,
-    ThievingRealmId
+  RealmName,
+  ThievingEquipmentSlotId,
+  ThievingRealmId,
 } from '../calc/types';
 
 type CurrencyType = 'gp' | 'ap';
@@ -31,7 +31,9 @@ function resolveCurrencyType(currencyId: string): CurrencyType {
 }
 
 function resolveRealm(realmId: string): RealmName {
-  return realmId === ThievingRealmId.ABYSSAL ? RealmName.ABYSSAL : RealmName.MELVOR;
+  return realmId === ThievingRealmId.ABYSSAL
+    ? RealmName.ABYSSAL
+    : RealmName.MELVOR;
 }
 
 function toLootItem(drop: AnyItemQuantity): LootItem {
