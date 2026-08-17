@@ -1,59 +1,46 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Operational guidance for Claude Code. Design, architecture, and technical details live in `specs/`.
 
-## What This Is
+> Canary: keep this file under 100 lines. If approaching that, extract instructions to a dedicated file.
 
-A Melvor Idle mod that simulates thieving outcomes for different loadouts, letting players compare XP/hr and GP/hr across all thieving NPCs without switching gear in-game. Built against the official Melvor modding API.
+## Build & Test commands
 
-The project is in early stages — `src/setup.ts` is a scaffold and the spec in `specs/constitution.md` is the design document.
+- Do not run any build or test commands. Leave it to the user, and ask for output / results if requried.
 
-## Build & Test
 
-```bash
-pnpm install
-pnpm build             # type-checks, bundles via webpack, minifies HTML templates → dist/
-pnpm test              # runs Jest with SWC transform
-pnpm buildzip          # build + package into a zip for mod upload
-```
+## TypeScript best practices
 
-No linter configured.
+- Enums should be created for type unions that require runtime value use.
+- Use `satisfies` to preserve inference while conforming to type.
+- Do not use `any` liberally; this defeats the purpose of using ts.
+- Do not type assert (`as`) unnecessarily; it obfuscates typing issues.
 
-## Architecture (Planned)
+## Documentation
 
-Three layers, all in `src/`:
+- Apply meaningful JSDoc comments for methods / functions. 
+- Properties can be given documentation if naming is not sufficient to convey all meaning, or hidden business rules
+- Refer to `utils/number-utils.ts` as **Canonical** example.
 
-1. **State reader** — extracts character state (equipment, mastery, modifiers, potions, agility, etc.) from live game objects via the Melvor modding API
-2. **Calculation engine** — pure functions: loadout config in, per-NPC metrics (XP/hr, GP/hr, success rate) out
-3. **UI layer** — comparison table and configuration panel injected into the game interface
+## Review
 
-The mod entry point is `src/setup.ts`, exported as `setup(ctx: Modding.ModContext)`. Webpack bundles it to `dist/setup.mjs`; the manifest (`manifest.json`) is copied into `dist/` at build time.
+- Review should be done in consultation with specs. Drifts should be highlighted.
 
-## Key Files
+## Testing
 
-- `manifest.json` — Melvor mod manifest (namespace: `thievingSimulator`)
-- `specs/constitution.md` — full design spec with feature list, mechanics to model, and open tasks
-- `specs/formulas.md` — thieving formulas and mechanics reference (interval, stealth, success rate, doubling, loot, synergies)
-- `specs/npc-data.md` — complete NPC stats and area data for both Melvor and Abyssal realms
-- `types/game-types/` — Melvor game type definitions (manually imported from the Melvor Typing Project)
-- `types/game-types/mod.d.ts` — modding API types (`Modding.ModContext`, lifecycle hooks)
-- `types/game-types/thieving2.d.ts` — thieving skill types
-- `types/game-types/game.d.ts` — root `Game` class types
+- All functions / methods should be unit tested.
+- If Data Driven Testing can be used for repeated test cases, use it. Refer to `utils/number-utils.spec.ts` for example.
 
-## TypeScript
+## Specs
 
-- Strict mode enabled with `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`
-- Module system: `esnext` with `verbatimModuleSyntax` and `moduleResolution: bundler` — use `import type` syntax for type-only imports
-- Target: `esnext`
+### Adherence
+MUST consult before design work, or implementation that affect design, if relevant:
 
-## Melvor Modding Conventions
+- `specs/constitution.md` — design spec: feature scope, mechanics, architecture, modding conventions, type definitions
+- `specs/formulas.md` — thieving formulas and mechanics reference
+- `specs/npc-data.md` — NPC stats and area data for both realms
+- `specs/tasks.md` — planned work tracker; update status to Done and check boxes when completing tasks
 
-- The mod registers via `export function setup(ctx: Modding.ModContext)` in the entry file
-- Lifecycle hooks: `ctx.onCharacterLoaded`, `ctx.onInterfaceReady`, etc. — character data is only available after `characterLoaded`
-- Game globals like `game` (the `Game` instance) are available at runtime and typed via `types/` — use them directly, no casts needed
-- Type definitions in `types/` provide shapes but not runtime behavior — runtime testing against the actual game is required
+### Source of truth
+- `constitution.md` should be the sole source of truth. If other specs disagree, confere to it, but highlight the discrapencies.
 
-## Workflow
-
-- `specs/constitution.md` is the design spec — consult it for feature scope, mechanics to model, and architectural decisions.
-- `specs/tasks.md` tracks all planned work, derived from the constitution. When completing a task, update its status to Done and check its boxes (`[ ]` → `[x]`).

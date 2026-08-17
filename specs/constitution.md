@@ -78,7 +78,9 @@ Expanded view for a single NPC. Loot table with drop rates, confidence intervals
 ### Platform
 
 - Melvor Idle mod via the official modding API
-- TypeScript, compiled to JS (`dist/setup.mjs`)
+- TypeScript, compiled to JS via Webpack
+- Entry point: `src/setup.ts`, exported as `setup(ctx: Modding.ModContext)` → bundles to `dist/setup.mjs`
+- Manifest (`manifest.json`) copied into `dist/` at build time
 - Type definitions from `melvor-typing-project` (manually imported community package) — see `types/` below
 - UI injected into the game's interface via mod context
 
@@ -89,15 +91,26 @@ Imported from the [Melvor Typing Project](https://github.com/GamesByMalcsPtyLtd/
 - **`game-types/`** — type definitions for game internals: skills, items, combat, modding API, UI components, etc. These define the shape of runtime globals like `game`, `thievingMenu`, and the `Modding.ModContext` lifecycle.
 - **`library-types/`** — type definitions for third-party libraries the game exposes as globals (e.g., Tippy.js, SweetAlert, Sortable, Pixi.js, petite-vue, Fuse.js). Available for use in mod UI code without bundling.
 
+Key files in `game-types/`:
+- `mod.d.ts` — modding API types (`Modding.ModContext`, lifecycle hooks)
+- `thieving2.d.ts` — thieving skill types
+- `game.d.ts` — root `Game` class types
+
 ### Architecture
 
-Three layers:
+Three layers, all in `src/`:
 
-1. **State reader** -- extracts character state from the game's live objects
-2. **Calculation engine** -- pure functions that take a loadout config and return per-NPC metrics
-3. **UI layer** -- renders comparison table and configuration panel
+1. **State reader** — extracts character state (equipment, mastery, modifiers, potions, agility, etc.) from live game objects via the Melvor modding API
+2. **Calculation engine** — pure functions: loadout config in, per-NPC metrics (XP/hr, GP/hr, success rate) out
+3. **UI layer** — comparison table and configuration panel injected into the game interface
 
 > **Key dependency:** The state reader layer's feasibility depends entirely on what the Melvor modding API exposes. The combat simulator mod is the primary reference for how to access character state, modifier stacking, and equipment data. Its source code must be studied before implementation begins.
+
+### Modding conventions
+
+- The mod registers via `export function setup(ctx: Modding.ModContext)` in the entry file
+- Lifecycle hooks: `ctx.onCharacterLoaded`, `ctx.onInterfaceReady`, etc. — character data is only available after `characterLoaded`
+- Game globals like `game` (the `Game` instance) are available at runtime and typed via `types/` — use them directly, no casts needed
 
 ---
 
@@ -122,7 +135,7 @@ Three layers:
 
 **Critical (Resolved):** The `game` global exposes character state directly — `game.thieving`, `game.combat.player`, `game.modifiers`, etc. No fragile hacks needed. The `melvor-types` package provides type coverage for these APIs.
 
-**Moderate:** The imported `types` may not cover all APIs needed, as the latest version only supports up to game version v1.2.0. Also, type definitions give signatures, not behavior -- runtime testing against the actual game is required.
+**Moderate:** The imported `types` may not cover all APIs needed, as the latest version only supports up to game version v1.2.0. Type definitions provide shapes but not runtime behavior — runtime testing against the actual game is required.
 
 **Low:** Wiki-sourced formulas may diverge from actual game logic. Acceptable given the accuracy tolerance, but specific edge cases (modifier stacking order, stun/potion interactions) should be validated against game source when possible.
 
