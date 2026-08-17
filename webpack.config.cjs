@@ -1,5 +1,5 @@
-const CopyPlugin = require('copy-webpack-plugin');
-const path = require('path');
+const CopyPlugin = require('copy-webpack-plugin')
+const path = require('path')
 
 module.exports = {
   mode: 'production',
@@ -39,6 +39,7 @@ module.exports = {
         exclude: /node_modules/,
         use: 'swc-loader',
       },
+      // TODO: enable when CSS assets are added
       // {
       //   test: /\.css$/i,
       //   use: ['style-loader', 'css-loader'],

@@ -6,14 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A Melvor Idle mod that simulates thieving outcomes for different loadouts, letting players compare XP/hr and GP/hr across all thieving NPCs without switching gear in-game. Built against the official Melvor modding API.
 
-The project is in early stages — `src/setup.mts` is a scaffold and the spec in `specs/constitution.md` is the design document.
+The project is in early stages — `src/setup.ts` is a scaffold and the spec in `specs/constitution.md` is the design document.
 
 ## Build & Test
 
 ```bash
 pnpm install
-pnpm exec tsc          # compiles src/ → dist/
+pnpm build             # type-checks, bundles via webpack, minifies HTML templates → dist/
 pnpm test              # runs Jest with SWC transform
+pnpm buildzip          # build + package into a zip for mod upload
 ```
 
 No linter configured.
@@ -26,11 +27,11 @@ Three layers, all in `src/`:
 2. **Calculation engine** — pure functions: loadout config in, per-NPC metrics (XP/hr, GP/hr, success rate) out
 3. **UI layer** — comparison table and configuration panel injected into the game interface
 
-The mod entry point is `src/setup.mts`, exported as `setup(ctx: Modding.ModContext)`. The manifest (`manifest.json`) points the game to `dist/setup.mjs`.
+The mod entry point is `src/setup.ts`, exported as `setup(ctx: Modding.ModContext)`. Webpack bundles it to `dist/setup.mjs`; the manifest (`manifest.json`) is copied into `dist/` at build time.
 
 ## Key Files
 
-- `manifest.json` — Melvor mod manifest (namespace: `melvorThievingSimulator`)
+- `manifest.json` — Melvor mod manifest (namespace: `thievingSimulator`)
 - `specs/constitution.md` — full design spec with feature list, mechanics to model, and open tasks
 - `specs/formulas.md` — thieving formulas and mechanics reference (interval, stealth, success rate, doubling, loot, synergies)
 - `specs/npc-data.md` — complete NPC stats and area data for both Melvor and Abyssal realms
@@ -42,7 +43,7 @@ The mod entry point is `src/setup.mts`, exported as `setup(ctx: Modding.ModConte
 ## TypeScript
 
 - Strict mode enabled with `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes`
-- Module system: `esnext` with `verbatimModuleSyntax` — use explicit `.mts` extensions and `import type` syntax
+- Module system: `esnext` with `verbatimModuleSyntax` and `moduleResolution: bundler` — use `import type` syntax for type-only imports
 - Target: `esnext`
 
 ## Melvor Modding Conventions

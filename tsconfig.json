@@ -7,8 +7,8 @@
 
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
-    "module": "nodenext",
-    "moduleResolution": "nodenext",
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "target": "esnext",
     // For nodejs:
     // "lib": ["esnext"],
@@ -22,7 +22,7 @@
     "exactOptionalPropertyTypes": true,
 
     // Style Options
-    "noImplicitAny": true,
+    // "noImplicitReturn": true,
     // "noImplicitOverride": true,
     // "noUnusedLocals": true,
     // "noUnusedParameters": true,
@@ -34,6 +34,7 @@
     "jsx": "react-jsx",
     "isolatedModules": true,
     "skipLibCheck": true,
+    "verbatimModuleSyntax": true
   },
   "exclude": ["./scripts", "./src/__fixtures__", "./src/**/*.spec.ts"]
 }

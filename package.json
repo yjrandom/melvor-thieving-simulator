@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "",
   "main": "setup.mjs",
+  "type": "module",
   "scripts": {
     "test": "jest",
     "build": "tsc --noEmit && webpack && node scripts/bundleHtml.mts",
