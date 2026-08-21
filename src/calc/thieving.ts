@@ -1,10 +1,10 @@
-import { boundValue } from '../utils/number-utils';
 import {
   BASE_INTERVAL_MS,
   BASE_STUN_DURATION_MS,
   MIN_INTERVAL_MS,
   MS_PER_HOUR,
-} from './constants';
+} from '../constants/game.constants';
+import { boundValue } from '../utils/number-utils';
 import type { ThievingBoosts, ThievingResult, ThievingTarget } from './types';
 
 // success_rate = min(1, (100 + stealth) / (100 + perception))
@@ -18,16 +18,16 @@ export function calcSuccessRate(
 // effective_interval = max(base - flat_reductions, minimum) * (1 - pct_reduction / 100)
 export function calcEffectiveInterval(boosts: ThievingBoosts): number {
   const afterFlat = Math.max(
-    BASE_INTERVAL_MS - boosts.flatIntervalReductionMs,
+    BASE_INTERVAL_MS - boosts.intervalReductionMs,
     MIN_INTERVAL_MS,
   );
-  return afterFlat * (1 - boosts.percentIntervalReduction / 100);
+  return afterFlat * (1 - boosts.intervalReductionPercent / 100);
 }
 
 export function calcStunDuration(boosts: ThievingBoosts): number {
   return Math.max(
     0,
-    BASE_STUN_DURATION_MS * (1 - boosts.percentStunDurationReduction / 100),
+    BASE_STUN_DURATION_MS * (1 - boosts.stunDurationReductionPercent / 100),
   );
 }
 
@@ -37,7 +37,7 @@ export function calcDoubleChance(
   boosts: ThievingBoosts,
 ): number {
   const stealthBased = boosts.stealth / (4 * target.perception);
-  return Math.min(1, stealthBased + boosts.additionalDoublePercent / 100);
+  return Math.min(1, stealthBased + boosts.additionalDoubleItemPercent / 100);
 }
 
 // unique_chance = (100 + stealth) / (10000 * perception)
@@ -53,8 +53,8 @@ export function calcAreaUniqueChance(
   boosts: ThievingBoosts,
 ): number {
   return (
-    baseChance * (1 + boosts.percentAreaUniqueBonus / 100) +
-    boosts.flatAreaUniqueBonus
+    baseChance * (1 + boosts.areaUniqueBonusPercent / 100) +
+    boosts.areaUniqueBonus
   );
 }
 
@@ -62,7 +62,7 @@ export function calcXpPerAction(
   target: ThievingTarget,
   boosts: ThievingBoosts,
 ): number {
-  return target.baseExperience * (1 + boosts.percentXpBonus / 100);
+  return target.baseExperience * (1 + boosts.xpBonusPercent / 100);
 }
 
 // avg_currency = (min + max) / 2 * (1 + currency_bonus / 100)
@@ -70,9 +70,8 @@ export function calcAvgCurrencyPerSuccess(
   target: ThievingTarget,
   boosts: ThievingBoosts,
 ): number {
-  const avgBase =
-    (target.currencyRange.min + target.currencyRange.max) / 2;
-  return avgBase * (1 + boosts.percentCurrencyBonus / 100);
+  const avgBase = (target.currencyRange.min + target.currencyRange.max) / 2;
+  return avgBase * (1 + boosts.currencyBonusPercent / 100);
 }
 
 export function calcThieving(

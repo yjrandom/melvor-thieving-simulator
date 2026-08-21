@@ -1,4 +1,4 @@
-import type { ThievingBoosts } from './types';
+import type { ThievingBoosts } from '../calc/types';
 
 export const BASE_INTERVAL_MS = 3000;
 export const BASE_STUN_DURATION_MS = 3000;
@@ -9,13 +9,13 @@ export const COMMON_DROP_CHANCE = 0.75;
 
 export const DEFAULT_BOOSTS: ThievingBoosts = {
   stealth: 0,
-  flatIntervalReductionMs: 0,
-  percentIntervalReduction: 0,
-  percentXpBonus: 0,
-  percentCurrencyBonus: 0,
-  additionalDoublePercent: 0,
+  intervalReductionMs: 0,
+  intervalReductionPercent: 0,
+  xpBonusPercent: 0,
+  currencyBonusPercent: 0,
+  additionalDoubleItemPercent: 0,
   stunAvoidancePercent: 0,
-  percentStunDurationReduction: 0,
-  percentAreaUniqueBonus: 0,
-  flatAreaUniqueBonus: 0,
+  stunDurationReductionPercent: 0,
+  areaUniqueBonusPercent: 0,
+  areaUniqueBonus: 0,
 };

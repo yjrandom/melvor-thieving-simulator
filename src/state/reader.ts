@@ -1,23 +1,25 @@
 import type {
-  ActivePotionInfo,
-  ActivePrayerInfo,
-  AgilityObstacleInfo,
-  AgilityPillarInfo,
-  AstrologyModifierInfo,
-  EquippedItemEntry,
-  LootItem,
-  PetInfo,
-  ShopPurchaseInfo,
-  SummoningSynergyInfo,
-  ThievingArea,
-  ThievingLoadout,
-  ThievingTarget,
+    AgilityObstacle,
+    AgilityPillar,
+    AstrologyConstellation,
+    EquippedItemEntry,
+    LootItem,
+    Modifier,
+    PetInfo,
+    Potion,
+    Prayer,
+    ShopPurchase,
+    SummoningSynergyInfo,
+    ThievingArea,
+    ThievingLoadout,
+    ThievingTarget,
 } from '../calc/types';
+import { RealmName } from '../calc/types';
 import {
-  RealmName,
-  ThievingEquipmentSlotId,
-  ThievingRealmId,
-} from '../calc/types';
+    ThievingBoostId,
+    ThievingEquipmentSlotId,
+    ThievingRealmId,
+} from '../constants/item-ids';
 
 type CurrencyType = 'gp' | 'ap';
 
@@ -52,12 +54,14 @@ export function readTargets(thieving: Thieving): ThievingTarget[] {
     const maxCurrency = primaryCurrency?.quantity ?? 0;
 
     const target: ThievingTarget = {
+      id: npc.id,
       name: npc.name,
       perception: npc.perception,
       maxHit: npc.maxHit,
       baseExperience: npc.baseExperience,
       level: npc.level,
-      realm: npc.area ? resolveRealm(npc.area.realm.id) : RealmName.MELVOR,
+      realmId:
+        (npc.area?.realm.id as ThievingRealmId) ?? ThievingRealmId.MELVOR,
       area: npc.area?.name ?? '',
       currencyRange: { min: maxCurrency > 0 ? 1 : 0, max: maxCurrency },
       currencyType,
@@ -73,12 +77,25 @@ export function readAreas(thieving: Thieving): ThievingArea[] {
   return thieving.areas.allObjects.map(
     (area): ThievingArea => ({
       name: area.name,
-      realm: resolveRealm(area.realm.id),
+      realm: area.realm.name as RealmName,
       levelRequirement: area.npcs[0]?.level ?? 1,
       targets: area.npcs.map((npc) => npc.name),
       areaUniqueDrops: area.uniqueDrops.map(toLootItem),
     }),
   );
+}
+
+/** Serializes game ModifierValue[] into plain data, preserving realm scope. */
+function resolveModifiers(modValues: ModifierValue[] | undefined): Modifier[] {
+  if (!modValues) return [];
+  return modValues.map((mv) => {
+    const resolved: Modifier = {
+      boostId: mv.modifier.id as ThievingBoostId,
+      value: mv.value,
+    };
+    if (mv.realm) resolved.realmId = mv.realm.id;
+    return resolved;
+  });
 }
 
 const THIEVING_SLOT_IDS = Object.values(ThievingEquipmentSlotId);
@@ -89,17 +106,21 @@ function readEquipment(player: Player): EquippedItemEntry[] {
   for (const slotId of THIEVING_SLOT_IDS) {
     if (equipment.isSlotEmpty(slotId)) continue;
     const item = equipment.getItemInSlot(slotId);
-    entries.push({ slotId, itemId: item.id, itemName: item.name });
+    entries.push({
+      slotId,
+      itemId: item.id,
+      itemName: item.name,
+      modifiers: resolveModifiers((item as EquipmentItem).modifiers),
+    });
   }
   return entries;
 }
 
-function readMasteryLevels(thieving: Thieving): Map<string, number> {
-  const levels = new Map<string, number>();
-  for (const npc of thieving.actions.allObjects) {
-    levels.set(npc.id, thieving.getMasteryLevel(npc));
+function readMasteryLevel(thieving: Thieving,): number {
+  if (!thieving.currentNPC) {
+    throw new Error('Missing target NPC')
   }
-  return levels;
+  return thieving.getMasteryLevel(thieving.currentNPC);
 }
 
 function readMasteryPoolPercent(
@@ -117,22 +138,33 @@ function readMasteryPoolPercent(
 function readActivePotion(
   potions: PotionManager,
   thieving: Thieving,
-): ActivePotionInfo | undefined {
+): Potion | undefined {
   const potion = potions.getActivePotionForAction(thieving);
   if (potion === undefined) return undefined;
   return {
     itemId: potion.id,
     itemName: potion.name,
     tier: potion.tier,
+    modifiers: resolveModifiers(potion.stats.modifiers),
   };
 }
 
-function readActivePrayers(player: Player): ActivePrayerInfo[] {
-  const prayers: ActivePrayerInfo[] = [];
-  for (const prayer of player.activePrayers) {
-    prayers.push({ id: prayer.id, name: prayer.name });
+function readActivePrayers(
+  activePrayers: Set<ActivePrayer>,
+): [Prayer] | [Prayer, Prayer] | undefined {
+  if (activePrayers.size === 0) {
+    return undefined;
   }
-  return prayers;
+
+  if (activePrayers.size === 1) {
+    return [activePrayers.values().next().value as Prayer];
+  }
+
+  if (activePrayers.size === 1) {
+    return [activePrayers.values().next().value as Prayer, activePrayers.values().next().value as Prayer];
+  }
+
+
 }
 
 const REALM_IDS = ['melvorD:Melvor', 'melvorItA:Abyssal'] as const;
@@ -140,15 +172,20 @@ const REALM_IDS = ['melvorD:Melvor', 'melvorItA:Abyssal'] as const;
 function readAgilityObstacles(
   agility: Agility,
   realms: Game['realms'],
-): AgilityObstacleInfo[] {
-  const obstacles: AgilityObstacleInfo[] = [];
+): AgilityObstacle[] {
+  const obstacles: AgilityObstacle[] = [];
   for (const realmId of REALM_IDS) {
     const realm = realms.getObjectByID(realmId);
     if (realm === undefined) continue;
     const course = agility.courses.get(realm);
     if (course === undefined) continue;
     for (const [slot, obstacle] of course.builtObstacles) {
-      obstacles.push({ id: obstacle.id, name: obstacle.name, slot });
+      obstacles.push({
+        id: obstacle.id,
+        name: obstacle.name,
+        slot,
+        modifiers: resolveModifiers(obstacle.modifiers),
+      });
     }
   }
   return obstacles;
@@ -157,15 +194,20 @@ function readAgilityObstacles(
 function readAgilityPillars(
   agility: Agility,
   realms: Game['realms'],
-): AgilityPillarInfo[] {
-  const pillars: AgilityPillarInfo[] = [];
+): AgilityPillar[] {
+  const pillars: AgilityPillar[] = [];
   for (const realmId of REALM_IDS) {
     const realm = realms.getObjectByID(realmId);
     if (realm === undefined) continue;
     const course = agility.courses.get(realm);
     if (course === undefined) continue;
     for (const [slot, pillar] of course.builtPillars) {
-      pillars.push({ id: pillar.id, name: pillar.name, slot });
+      pillars.push({
+        id: pillar.id,
+        name: pillar.name,
+        slot,
+        modifiers: resolveModifiers(pillar.modifiers),
+      });
     }
   }
   return pillars;
@@ -174,30 +216,24 @@ function readAgilityPillars(
 function readAstrologyModifiers(
   astrology: Astrology,
   thieving: Thieving,
-): AstrologyModifierInfo[] {
-  const mods: AstrologyModifierInfo[] = [];
+): AstrologyConstellation[] {
+  const mods: AstrologyConstellation[] = [];
   for (const recipe of astrology.actions.allObjects) {
     if (!recipe.skills.includes(thieving as unknown as AnySkill)) continue;
-    const addMods = (
-      modifiers: AstrologyModifier[],
-      modifierType: AstrologyModifierInfo['modifierType'],
-    ) => {
-      modifiers.forEach((mod, index) => {
+    const collectMods = (modifiers: AstrologyModifier[]) => {
+      for (const mod of modifiers) {
         if (mod.timesBought > 0) {
           mods.push({
             constellationId: recipe.id,
             constellationName: recipe.name,
-            modifierType,
-            index,
-            timesBought: mod.timesBought,
-            maxCount: mod.maxCount,
+            modifiers: resolveModifiers(mod.stats.modifiers),
           });
         }
-      });
+      }
     };
-    addMods(recipe.standardModifiers, 'standard');
-    addMods(recipe.uniqueModifiers, 'unique');
-    addMods(recipe.abyssalModifiers, 'abyssal');
+    collectMods(recipe.standardModifiers);
+    collectMods(recipe.uniqueModifiers);
+    collectMods(recipe.abyssalModifiers);
   }
   return mods;
 }
@@ -210,8 +246,8 @@ function readActivePets(petManager: PetManager): PetInfo[] {
   return pets;
 }
 
-function readShopPurchases(shop: Shop): ShopPurchaseInfo[] {
-  const purchases: ShopPurchaseInfo[] = [];
+function readShopPurchases(shop: Shop): ShopPurchase[] {
+  const purchases: ShopPurchase[] = [];
   for (const [purchase, count] of shop.upgradesPurchased) {
     if (count > 0) {
       purchases.push({ id: purchase.id, name: purchase.name, count });
@@ -227,6 +263,7 @@ function readActiveSynergy(player: Player): SummoningSynergyInfo | undefined {
     summon1Id: synergy.summons[0].product.id,
     summon2Id: synergy.summons[1].product.id,
     description: synergy.description,
+    modifiers: resolveModifiers(synergy.modifiers),
   };
 }
 
@@ -234,7 +271,7 @@ export function readLoadout(game: Game): ThievingLoadout {
   const player = game.combat.player;
   return {
     equipment: readEquipment(player),
-    masteryLevels: readMasteryLevels(game.thieving),
+    masteryLevel: readMasteryLevel(game.thieving),
     melvorMasteryPoolPercent: readMasteryPoolPercent(
       game.thieving,
       game.realms,
@@ -246,13 +283,16 @@ export function readLoadout(game: Game): ThievingLoadout {
       'melvorItA:Abyssal',
     ),
     activePotion: readActivePotion(game.potions, game.thieving),
-    activePrayers: readActivePrayers(player),
+    activePrayers: readActivePrayers(player.activePrayers),
     agilityObstacles: readAgilityObstacles(game.agility, game.realms),
     agilityPillars: readAgilityPillars(game.agility, game.realms),
-    astrologyModifiers: readAstrologyModifiers(game.astrology, game.thieving),
+    astrologyConstellations: readAstrologyModifiers(
+      game.astrology,
+      game.thieving,
+    ),
     activePets: readActivePets(game.petManager),
     shopPurchases: readShopPurchases(game.shop),
-    activeSynergy: readActiveSynergy(player),
+    activeSummoningSynergy: readActiveSynergy(player),
     skillLevel: game.thieving.level,
     abyssalSkillLevel: game.thieving.abyssalLevel,
   };

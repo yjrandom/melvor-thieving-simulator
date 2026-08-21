@@ -1,11 +1,13 @@
-import type { ThievingTarget } from '../calc/types';
+import { type ThievingTarget } from '../calc/types';
+import { ThievingRealmId } from '../constants/item-ids';
 
 export const MELVOR_TARGETS: ThievingTarget[] = [
   // Low Town
   {
+    id: 'melvorF:Man',
     name: 'Man',
     area: 'Low Town',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 1,
     baseExperience: 5,
     maxHit: 22,
@@ -14,9 +16,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     currencyType: 'gp',
   },
   {
+    id: 'melvorF:Woman',
     name: 'Woman',
     area: 'Low Town',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 4,
     baseExperience: 7,
     maxHit: 32,
@@ -27,9 +30,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
   },
   // Golbin Village
   {
+    id: 'melvorF:Golbin',
     name: 'Golbin',
     area: 'Golbin Village',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 8,
     baseExperience: 10,
     maxHit: 40,
@@ -38,9 +42,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     currencyType: 'gp',
   },
   {
+    id: 'melvorF:Golbin_Chief',
     name: 'Golbin Chief',
     area: 'Golbin Village',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 16,
     baseExperience: 18,
     maxHit: 101,
@@ -51,9 +56,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
   },
   // Bandit Hideout
   {
+    id: 'melvorF:Bandit_Thug',
     name: 'Bandit Thug',
     area: 'Bandit Hideout',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 12,
     baseExperience: 13,
     maxHit: 54,
@@ -62,9 +68,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     currencyType: 'gp',
   },
   {
+    id: 'melvorF:Marauder',
     name: 'Marauder',
     area: 'Bandit Hideout',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 21,
     baseExperience: 19,
     maxHit: 68,
@@ -75,9 +82,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
   },
   // Banquet
   {
+    id: 'melvorF:Assistant_Cook',
     name: 'Assistant Cook',
     area: 'Banquet',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 26,
     baseExperience: 26,
     maxHit: 86,
@@ -87,9 +95,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: "Chef's Spoon", dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorF:Chef',
     name: 'Chef',
     area: 'Banquet',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 34,
     baseExperience: 31,
     maxHit: 108,
@@ -100,9 +109,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
   },
   // Farmer's Market
   {
+    id: 'melvorF:Merchant',
     name: 'Merchant',
     area: "Farmer's Market",
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 31,
     baseExperience: 29,
     maxHit: 97,
@@ -112,9 +122,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: "Merchant's Permit", dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorF:Bob_The_Farmer',
     name: 'Bob the Farmer',
     area: "Farmer's Market",
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 39,
     baseExperience: 36,
     maxHit: 137,
@@ -125,9 +136,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
   },
   // Port of Lemvor
   {
+    id: 'melvorF:Dock_Hand',
     name: 'Dock Hand',
     area: 'Port of Lemvor',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 45,
     baseExperience: 42,
     maxHit: 119,
@@ -137,9 +149,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: "Sailor's Top", dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorF:Fisherman',
     name: 'Fisherman',
     area: 'Port of Lemvor',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 54,
     baseExperience: 46,
     maxHit: 101,
@@ -149,9 +162,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
   },
   // Cave of Giants
   {
+    id: 'melvorF:Troll',
     name: 'Troll',
     area: 'Cave of Giants',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 49,
     baseExperience: 50,
     maxHit: 151,
@@ -160,9 +174,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     currencyType: 'gp',
   },
   {
+    id: 'melvorF:Cyclops',
     name: 'Cyclops',
     area: 'Cave of Giants',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 57,
     baseExperience: 53,
     maxHit: 173,
@@ -173,9 +188,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
   },
   // Outskirts
   {
+    id: 'melvorF:Lumberjack',
     name: 'Lumberjack',
     area: 'Outskirts',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 61,
     baseExperience: 62,
     maxHit: 155,
@@ -185,9 +201,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: "Lumberjack's Top", dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorF:Miner',
     name: 'Miner',
     area: 'Outskirts',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 70,
     baseExperience: 73,
     maxHit: 180,
@@ -198,9 +215,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
   },
   // Fort
   {
+    id: 'melvorF:Squire',
     name: 'Squire',
     area: 'Fort',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 66,
     baseExperience: 67,
     maxHit: 169,
@@ -210,9 +228,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Training Shield', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorF:Knight',
     name: 'Knight',
     area: 'Fort',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 88,
     baseExperience: 107,
     maxHit: 241,
@@ -223,9 +242,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
   },
   // Wizard Tower
   {
+    id: 'melvorF:Acolyte',
     name: 'Acolyte',
     area: 'Wizard Tower',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 75,
     baseExperience: 76,
     maxHit: 162,
@@ -235,9 +255,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Book of Scholars', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorF:Wizard',
     name: 'Wizard',
     area: 'Wizard Tower',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 84,
     baseExperience: 95,
     maxHit: 216,
@@ -251,9 +272,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
   },
   // Royal Castle
   {
+    id: 'melvorF:Court_Jester',
     name: 'Court Jester',
     area: 'Royal Castle',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 79,
     baseExperience: 82,
     maxHit: 198,
@@ -263,9 +285,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: "Jester's Hat", dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorF:Princess',
     name: 'Princess',
     area: 'Royal Castle',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 92,
     baseExperience: 120,
     maxHit: 266,
@@ -275,9 +298,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Jadestone', dropQuantity: { min: 300, max: 300 } },
   },
   {
+    id: 'melvorF:King',
     name: 'King',
     area: 'Royal Castle',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 95,
     baseExperience: 133,
     maxHit: 306,
@@ -294,9 +318,10 @@ export const MELVOR_TARGETS: ThievingTarget[] = [
 export const TOTH_TARGETS: ThievingTarget[] = [
   // Lost Ruins
   {
+    id: 'melvorTotH:Explorer',
     name: 'Explorer',
     area: 'Lost Ruins',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 100,
     baseExperience: 184,
     maxHit: 290,
@@ -306,9 +331,10 @@ export const TOTH_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Grappling Hook', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorTotH:Adventurer',
     name: 'Adventurer',
     area: 'Lost Ruins',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 105,
     baseExperience: 235,
     maxHit: 390,
@@ -321,9 +347,10 @@ export const TOTH_TARGETS: ThievingTarget[] = [
     },
   },
   {
+    id: 'melvorTotH:Treasure_Hunter',
     name: 'Treasure Hunter',
     area: 'Lost Ruins',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 110,
     baseExperience: 309,
     maxHit: 440,
@@ -334,9 +361,10 @@ export const TOTH_TARGETS: ThievingTarget[] = [
   },
   // Undead Palace
   {
+    id: 'melvorTotH:Necromancer',
     name: 'Necromancer',
     area: 'Undead Palace',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 102,
     baseExperience: 198,
     maxHit: 345,
@@ -349,9 +377,10 @@ export const TOTH_TARGETS: ThievingTarget[] = [
     },
   },
   {
+    id: 'melvorTotH:Dark_Knight',
     name: 'Dark Knight',
     area: 'Undead Palace',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 108,
     baseExperience: 257,
     maxHit: 365,
@@ -365,9 +394,10 @@ export const TOTH_TARGETS: ThievingTarget[] = [
   },
   // Desert
   {
+    id: 'melvorTotH:Pilgrim',
     name: 'Pilgrim',
     area: 'Desert',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 104,
     baseExperience: 215,
     maxHit: 320,
@@ -377,9 +407,10 @@ export const TOTH_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Amulet of Prayers', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorTotH:Travelling_Merchant',
     name: 'Travelling Merchant',
     area: 'Desert',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 112,
     baseExperience: 339,
     maxHit: 480,
@@ -393,9 +424,10 @@ export const TOTH_TARGETS: ThievingTarget[] = [
   },
   // Mushroom Forest
   {
+    id: 'melvorTotH:Sage',
     name: 'Sage',
     area: 'Mushroom Forest',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 110,
     baseExperience: 282,
     maxHit: 410,
@@ -405,9 +437,10 @@ export const TOTH_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Potion Stirrer', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorTotH:Madremonte',
     name: 'Madremonte',
     area: 'Mushroom Forest',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 116,
     baseExperience: 413,
     maxHit: 525,
@@ -421,9 +454,10 @@ export const TOTH_TARGETS: ThievingTarget[] = [
   },
   // Twilight
   {
+    id: 'melvorTotH:Vampire',
     name: 'Vampire',
     area: 'Twilight',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 114,
     baseExperience: 371,
     maxHit: 465,
@@ -433,9 +467,10 @@ export const TOTH_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Blood Ring', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorTotH:Vampire_Lord',
     name: 'Vampire Lord',
     area: 'Twilight',
-    realm: 'melvor',
+    realmId: ThievingRealmId.MELVOR,
     level: 118,
     baseExperience: 503,
     maxHit: 550,
@@ -449,9 +484,10 @@ export const TOTH_TARGETS: ThievingTarget[] = [
 export const ABYSSAL_TARGETS: ThievingTarget[] = [
   // Crimson Village
   {
+    id: 'melvorItA:Turned_Man',
     name: 'Turned Man',
     area: 'Crimson Village',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 1,
     baseExperience: 1052,
     maxHit: 4750,
@@ -460,9 +496,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
     currencyType: 'ap',
   },
   {
+    id: 'melvorItA:Turned_Woman',
     name: 'Turned Woman',
     area: 'Crimson Village',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 4,
     baseExperience: 1348,
     maxHit: 7500,
@@ -475,9 +512,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
     },
   },
   {
+    id: 'melvorItA:Turned_Farmer',
     name: 'Turned Farmer',
     area: 'Crimson Village',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 13,
     baseExperience: 2266,
     maxHit: 11000,
@@ -488,9 +526,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
   },
   // Blighted Reach
   {
+    id: 'melvorItA:Blighted_Dryad',
     name: 'Blighted Dryad',
     area: 'Blighted Reach',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 8,
     baseExperience: 1657,
     maxHit: 8500,
@@ -500,9 +539,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Blighted Staff', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorItA:Blighted_Treant',
     name: 'Blighted Treant',
     area: 'Blighted Reach',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 20,
     baseExperience: 2721,
     maxHit: 15500,
@@ -516,9 +556,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
   },
   // Shadeveil Maze
   {
+    id: 'melvorItA:Dark_Shade',
     name: 'Dark Shade',
     area: 'Shadeveil Maze',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 16,
     baseExperience: 2209,
     maxHit: 13000,
@@ -528,9 +569,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Shade Key', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorItA:Dark_Wraithlurker',
     name: 'Dark Wraithlurker',
     area: 'Shadeveil Maze',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 24,
     baseExperience: 2914,
     maxHit: 18000,
@@ -540,9 +582,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Lurker Gem', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorItA:Dark_Shadowmancer',
     name: 'Dark Shadowmancer',
     area: 'Shadeveil Maze',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 31,
     baseExperience: 3673,
     maxHit: 24000,
@@ -553,9 +596,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
   },
   // Withering Ruins
   {
+    id: 'melvorItA:Withering_Gargoyle',
     name: 'Withering Gargoyle',
     area: 'Withering Ruins',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 27,
     baseExperience: 3265,
     maxHit: 21000,
@@ -565,9 +609,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Withering Gem', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorItA:Withering_Golem',
     name: 'Withering Golem',
     area: 'Withering Ruins',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 34,
     baseExperience: 4039,
     maxHit: 27000,
@@ -578,9 +623,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
   },
   // Silent Crypt
   {
+    id: 'melvorItA:Silent_Poltergeist',
     name: 'Silent Poltergeist',
     area: 'Silent Crypt',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 38,
     baseExperience: 4372,
     maxHit: 31000,
@@ -593,9 +639,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
     },
   },
   {
+    id: 'melvorItA:Silent_Wanderer',
     name: 'Silent Wanderer',
     area: 'Silent Crypt',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 42,
     baseExperience: 5104,
     maxHit: 35000,
@@ -605,9 +652,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Silent Boots', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorItA:Silent_Keeper',
     name: 'Silent Keeper',
     area: 'Silent Crypt',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 50,
     baseExperience: 5732,
     maxHit: 41000,
@@ -618,9 +666,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
   },
   // Void Vaults
   {
+    id: 'melvorItA:Void_Envoy',
     name: 'Void Envoy',
     area: 'Void Vaults',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 46,
     baseExperience: 5537,
     maxHit: 37000,
@@ -630,9 +679,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
     uniqueDrop: { name: 'Voidtaker Amulet', dropQuantity: { min: 1, max: 1 } },
   },
   {
+    id: 'melvorItA:Void_Shambler',
     name: 'Void Shambler',
     area: 'Void Vaults',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 54,
     baseExperience: 5886,
     maxHit: 43000,
@@ -645,9 +695,10 @@ export const ABYSSAL_TARGETS: ThievingTarget[] = [
     },
   },
   {
+    id: 'melvorItA:Void_Gazer',
     name: 'Void Gazer',
     area: 'Void Vaults',
-    realm: 'abyssal',
+    realmId: ThievingRealmId.ABYSSAL,
     level: 57,
     baseExperience: 7742,
     maxHit: 45000,

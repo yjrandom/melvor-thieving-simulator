@@ -1,3 +1,5 @@
+import type { ThievingBoostId, ThievingRealmId } from '../constants/item-ids';
+
 export interface NumberRange {
   min: number;
   max: number;
@@ -13,12 +15,12 @@ export interface LootItem {
 // A live ThievingNPC instance satisfies this structurally at runtime.
 type NpcCalcFields = Pick<
   ThievingNPC,
-  'name' | 'perception' | 'maxHit' | 'baseExperience' | 'level'
+  'id' | 'name' | 'perception' | 'maxHit' | 'baseExperience' | 'level'
 >;
 
 export interface ThievingTarget extends NpcCalcFields {
   // Derived from npc.area.realm — game Realm is a class, we use a string discriminant
-  realm: 'melvor' | 'abyssal';
+  realmId: ThievingRealmId;
   // Derived from npc.area.name
   area: string;
   // Computed from npc.currencyDrops + modifiers (game stores max only)
@@ -40,42 +42,54 @@ export interface ThievingArea {
   areaUniqueDrops: LootItem[];
 }
 
+/** A game modifier value resolved to plain data, decoupled from game object references. */
+export interface Modifier {
+  /** Modifier.id, e.g. "melvorD:thievingStealth", specific to thieving. */
+  boostId: ThievingBoostId;
+  /** Signed numeric value — positive means increase */
+  value: number;
+  /** Realm scope ID, if the modifier is realm-gated */
+  realmId?: string;
+}
+
 export interface EquippedItemEntry {
   slotId: string;
   itemId: string;
   itemName: string;
+  modifiers: Modifier[];
 }
 
-export interface ActivePotionInfo {
+export interface Potion {
   itemId: string;
   itemName: string;
   tier: number;
+  modifiers: Modifier[];
 }
 
-export interface ActivePrayerInfo {
+export interface Prayer {
   id: string;
   name: string;
 }
 
-export interface AgilityObstacleInfo {
-  id: string;
-  name: string;
-  slot: number;
-}
-
-export interface AgilityPillarInfo {
+export interface AgilityObstacle {
   id: string;
   name: string;
   slot: number;
+  modifiers: Modifier[];
 }
 
-export interface AstrologyModifierInfo {
+export interface AgilityPillar {
+  id: string;
+  name: string;
+  slot: number;
+  modifiers: Modifier[];
+}
+
+export interface AstrologyConstellation {
   constellationId: string;
   constellationName: string;
-  modifierType: 'standard' | 'unique' | 'abyssal';
-  index: number;
-  timesBought: number;
-  maxCount: number;
+  /** Resolved modifier values at max-level; scale by timesBought / maxCount */
+  modifiers: Modifier[];
 }
 
 export interface PetInfo {
@@ -83,7 +97,7 @@ export interface PetInfo {
   name: string;
 }
 
-export interface ShopPurchaseInfo {
+export interface ShopPurchase {
   id: string;
   name: string;
   count: number;
@@ -93,36 +107,57 @@ export interface SummoningSynergyInfo {
   summon1Id: string;
   summon2Id: string;
   description: string;
+  modifiers: Modifier[];
 }
 
 export interface ThievingLoadout {
   equipment: EquippedItemEntry[];
-  masteryLevels: Map<string, number>;
+  /** Thieving mastery level */
+  masteryLevel: number;
   melvorMasteryPoolPercent: number;
   abyssalMasteryPoolPercent: number;
-  activePotion: ActivePotionInfo | undefined;
-  activePrayers: ActivePrayerInfo[];
-  agilityObstacles: AgilityObstacleInfo[];
-  agilityPillars: AgilityPillarInfo[];
-  astrologyModifiers: AstrologyModifierInfo[];
+  activePotion: Potion | undefined;
+  activePrayers: [Prayer] | [Prayer, Prayer] | undefined;
+  agilityObstacles: AgilityObstacle[];
+  agilityPillars: AgilityPillar[];
+  astrologyConstellations: AstrologyConstellation[];
   activePets: PetInfo[];
-  shopPurchases: ShopPurchaseInfo[];
-  activeSynergy: SummoningSynergyInfo | undefined;
+  shopPurchases: ShopPurchase[];
+  activeSummoningSynergy: SummoningSynergyInfo | undefined;
   skillLevel: number;
   abyssalSkillLevel: number;
 }
 
 export interface ThievingBoosts {
+  /** Thieving stealth stat */
   stealth: number;
-  flatIntervalReductionMs: number;
-  percentIntervalReduction: number;
-  percentXpBonus: number;
-  percentCurrencyBonus: number;
-  additionalDoublePercent: number;
+
+  /** Flat reduction in skill interval in milliseconds */
+  intervalReductionMs: number;
+
+  /** Percentage reduction in skill interval */
+  intervalReductionPercent: number;
+
+  /** Percentage bonus to XP gained */
+  xpBonusPercent: number;
+
+  /** Percentage bonus to currency gained */
+  currencyBonusPercent: number;
+
+  /** Percentage chance to double dropped items */
+  additionalDoubleItemPercent: number;
+
+  /** Percentage chance to avoid being stunned */
   stunAvoidancePercent: number;
-  percentStunDurationReduction: number;
-  percentAreaUniqueBonus: number;
-  flatAreaUniqueBonus: number;
+
+  /** Percentage reduction in stun duration */
+  stunDurationReductionPercent: number;
+
+  /** Flat bonus to area unique chance */
+  areaUniqueBonus: number;
+
+  /** Percentage bonus to area unique chance */
+  areaUniqueBonusPercent: number;
 }
 
 export interface ThievingResult {
@@ -136,46 +171,4 @@ export interface ThievingResult {
   successfulActionsPerHour: number;
   xpPerHour: number;
   currencyPerHour: number;
-}
-
-/**
- * Extracted from game typedef.
- *
- * See {@linkcode CurrencyIds} in `idEnums.d.ts`
- */
-export enum ThievingCurrencyId {
-  GP = 'melvorD:GP',
-  AP = 'melvorD:AP',
-}
-
-export enum ThievingRealmId {
-  MELVOR = 'melvorD:Melvor',
-  ABYSSAL = 'melvorItA:Abyssal',
-}
-
-/**
- * Extracted from game typedef.
- *
- * See {@linkcode EquipmentSlotId} in `idEnums.d.ts`
- */
-export enum ThievingEquipmentSlotId {
-  HELMET = 'melvorD:Helmet',
-  PLATEBODY = 'melvorD:Platebody',
-  PLATELEGS = 'melvorD:Platelegs',
-  BOOTS = 'melvorD:Boots',
-  WEAPON = 'melvorD:Weapon',
-  SHIELD = 'melvorD:Shield',
-  AMULET = 'melvorD:Amulet',
-  RING = 'melvorD:Ring',
-  GLOVES = 'melvorD:Gloves',
-  QUIVER = 'melvorD:Quiver',
-  CAPE = 'melvorD:Cape',
-  PASSIVE = 'melvorD:Passive',
-  SUMMON1 = 'melvorD:Summon1',
-  SUMMON2 = 'melvorD:Summon2',
-  CONSUMABLE = 'melvorD:Consumable',
-  GEM = 'melvorD:Gem',
-  ENHANCEMENT1 = 'melvorD:Enhancement1',
-  ENHANCEMENT2 = 'melvorD:Enhancement2',
-  ENHANCEMENT3 = 'melvorD:Enhancement3',
 }

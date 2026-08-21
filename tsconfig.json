@@ -36,5 +36,5 @@
     "skipLibCheck": true,
     "verbatimModuleSyntax": true
   },
-  "exclude": ["./scripts", "./src/__fixtures__", "./src/**/*.spec.ts"]
+  "exclude": ["./scripts"]
 }
