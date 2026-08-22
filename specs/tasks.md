@@ -200,14 +200,21 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 
 ### 4.1 Comparison table (primary screen)
 
-**Status:** Blocked on 1.3, 2.1
+**Status:** Done
 **Why:** Core deliverable. A table of all thieving NPCs showing XP/hr, GP/hr, success rate for the active loadout. Requires working boost aggregation and calc engine.
 
-- [ ] Define table columns (NPC name, area, level, XP/hr, GP/hr, success rate, double chance)
-- [ ] Implement table rendering (injected into game UI via mod context)
-- [ ] Default sort by XP/hr, allow column sorting
-- [ ] Realm tabs or filter (Melvor / Abyssal / All)
-- [ ] Style with `assets/style.css`
+- [x] Define table columns (NPC name, area, level, XP/hr, GP/hr, success rate, double chance)
+- [x] Implement table rendering (injected into game UI via mod context)
+- [x] Default sort by XP/hr, allow column sorting
+- [x] Realm tabs or filter (Melvor / Abyssal / All)
+- [x] Style with `assets/style.css`
+
+**Notes:**
+- Reader extended with `readAllMasteryLevels` for bulk per-NPC mastery; `readLoadout` no longer requires a selected NPC
+- `MainModal` component pre-computes all rows via aggregator + calc engine, exposes reactive sort/filter
+- Number formatting utilities added: `formatNumber` (K/M/B suffixes) and `formatPercent`
+- CSS loaded via manifest `load` array, copied to `dist/` by webpack CopyPlugin
+- Mastery level shown as a badge next to NPC name in each row
 
 ### 4.2 Configuration panel
 

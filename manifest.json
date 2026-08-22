@@ -1,5 +1,5 @@
 {
   "namespace": "thievingSimulator",
   "setup": "setup.mjs",
-  "load": ["templates.min.html"]
+  "load": ["templates.min.html", "style.css"]
 }

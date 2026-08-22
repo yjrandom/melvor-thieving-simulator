@@ -1,4 +1,4 @@
-import { boundValue } from './number-utils';
+import { boundValue, formatNumber, formatPercent } from './number-utils';
 
 describe('Number Utils', () => {
   describe('boundValue', () => {
@@ -46,6 +46,63 @@ describe('Number Utils', () => {
           expect(() => boundValue(value, min, max)).toThrow(Error);
         },
       );
+    });
+  });
+
+  describe('formatNumber', () => {
+    describe('should format numbers below 100K with comma grouping', () => {
+      it.each`
+        scenario                        | value      | decimals     | expected
+        ${'zero'}                       | ${0}       | ${0}         | ${'0'}
+        ${'small integer'}              | ${42}      | ${0}         | ${'42'}
+        ${'thousands with commas'}      | ${1234}    | ${0}         | ${'1,234'}
+        ${'tens of thousands'}          | ${99999}   | ${0}         | ${'99,999'}
+        ${'with decimal places'}        | ${1234.5}  | ${1}         | ${'1,234.5'}
+        ${'default zero decimals'}      | ${1234.7}  | ${undefined} | ${'1,235'}
+      `('$scenario', ({ value, decimals, expected }) => {
+        expect(formatNumber(value, decimals)).toBe(expected);
+      });
+    });
+
+    describe('should collapse large numbers with K/M/B suffixes', () => {
+      it.each`
+        scenario                 | value              | expected
+        ${'100K threshold'}      | ${100000}          | ${'100.0K'}
+        ${'hundreds of K'}       | ${456789}          | ${'456.8K'}
+        ${'millions'}            | ${1500000}         | ${'1.5M'}
+        ${'tens of millions'}    | ${12345678}        | ${'12.3M'}
+        ${'billions'}            | ${2500000000}      | ${'2.5B'}
+      `('$scenario', ({ value, expected }) => {
+        expect(formatNumber(value)).toBe(expected);
+      });
+    });
+
+    describe('should handle negative values', () => {
+      it.each`
+        scenario                 | value       | expected
+        ${'negative small'}      | ${-42}      | ${'-42'}
+        ${'negative millions'}   | ${-1500000} | ${'-1.5M'}
+      `('$scenario', ({ value, expected }) => {
+        expect(formatNumber(value)).toBe(expected);
+      });
+    });
+  });
+
+  describe('formatPercent', () => {
+    describe('should format ratios as percentages', () => {
+      it.each`
+        scenario                      | ratio    | decimals     | expected
+        ${'zero'}                     | ${0}     | ${1}         | ${'0.0%'}
+        ${'50%'}                      | ${0.5}   | ${1}         | ${'50.0%'}
+        ${'100%'}                     | ${1}     | ${1}         | ${'100.0%'}
+        ${'fractional percent'}       | ${0.853} | ${1}         | ${'85.3%'}
+        ${'no decimals'}              | ${0.75}  | ${0}         | ${'75%'}
+        ${'two decimals'}             | ${0.123} | ${2}         | ${'12.30%'}
+        ${'default one decimal'}      | ${0.999} | ${undefined} | ${'99.9%'}
+        ${'over 100%'}                | ${1.5}   | ${1}         | ${'150.0%'}
+      `('$scenario', ({ ratio, decimals, expected }) => {
+        expect(formatPercent(ratio, decimals)).toBe(expected);
+      });
     });
   });
 });

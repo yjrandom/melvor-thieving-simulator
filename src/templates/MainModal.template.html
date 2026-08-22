@@ -1,6 +1,54 @@
 <template id="ts-modal">
-  <div :style="`visibility: ${isOpen ? initial : hidden}`">
-    <div>{{ props.theivingTargets }}</div>
-    <div>{{ props.theivingAreas }}</div>
+  <div class="ts-overlay" v-show="isOpen" @click.self="setIsOpen">
+    <div class="ts-modal">
+      <div class="ts-header">
+        <h2 class="ts-title">Thieving Simulator</h2>
+        <div class="ts-header-actions">
+          <div class="ts-realm-tabs">
+            <button class="ts-tab" :class="{ 'ts-tab--active': realmFilter === 'all' }" @click="setRealmFilter('all')">All</button>
+            <button class="ts-tab" :class="{ 'ts-tab--active': realmFilter === 'melvor' }" @click="setRealmFilter('melvor')">Melvor</button>
+            <button class="ts-tab" :class="{ 'ts-tab--active': realmFilter === 'abyssal' }" @click="setRealmFilter('abyssal')">Abyssal</button>
+          </div>
+          <button class="ts-close" @click="setIsOpen">&times;</button>
+        </div>
+      </div>
+      <div class="ts-modal-body">
+        <div class="ts-table-wrap">
+          <table class="ts-table">
+            <thead>
+              <tr>
+                <th class="ts-th ts-th--text" @click="toggleSort('npc')">NPC<span class="ts-sort-indicator" v-text="sortIndicator('npc')"></span></th>
+                <th class="ts-th ts-th--text" @click="toggleSort('area')">Area<span class="ts-sort-indicator" v-text="sortIndicator('area')"></span></th>
+                <th class="ts-th ts-th--num" @click="toggleSort('level')">Lvl<span class="ts-sort-indicator" v-text="sortIndicator('level')"></span></th>
+                <th class="ts-th ts-th--num" @click="toggleSort('xpHr')">XP/hr<span class="ts-sort-indicator" v-text="sortIndicator('xpHr')"></span></th>
+                <th class="ts-th ts-th--num" @click="toggleSort('currencyHr')">GP/hr<span class="ts-sort-indicator" v-text="sortIndicator('currencyHr')"></span></th>
+                <th class="ts-th ts-th--num" @click="toggleSort('success')">Success<span class="ts-sort-indicator" v-text="sortIndicator('success')"></span></th>
+                <th class="ts-th ts-th--num" @click="toggleSort('double')">Double<span class="ts-sort-indicator" v-text="sortIndicator('double')"></span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in filteredRows" class="ts-row">
+                <td class="ts-td ts-td--npc">
+                  <span class="ts-npc-name" v-text="row.target.name"></span>
+                  <span class="ts-mastery-badge" v-text="row.masteryLevel"></span>
+                </td>
+                <td class="ts-td ts-td--text" v-text="row.target.area"></td>
+                <td class="ts-td ts-td--num" v-text="row.target.level"></td>
+                <td class="ts-td ts-td--num" v-text="row.formattedXpHr"></td>
+                <td class="ts-td ts-td--num">
+                  <span v-text="row.formattedCurrencyHr"></span>
+                  <span class="ts-currency-label" v-text="row.currencyLabel"></span>
+                </td>
+                <td class="ts-td ts-td--num" v-text="row.formattedSuccess"></td>
+                <td class="ts-td ts-td--num" v-text="row.formattedDouble"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="ts-footer">
+          <span class="ts-count" v-text="filteredRows.length + ' NPCs'"></span>
+        </div>
+      </div>
+    </div>
   </div>
 </template>

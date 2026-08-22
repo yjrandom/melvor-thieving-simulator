@@ -122,12 +122,12 @@ Three layers, all in `src/`:
 | Inventory accessible APIs          | **Resolved** | Key APIs identified: `game.thieving`, `game.combat.player`, `game.potions`, `game.agility`, `game.astrology`, `game.modifiers`. All available after `ctx.onCharacterLoaded`. |
 | Map thieving formulas              | **Done**    | See `specs/formulas.md` — all formulas, modifier stacking, and mechanic details extracted from wiki.                                |
 | Catalog NPC/area data              | **Done**    | See `specs/npc-data.md` — all NPC stats, area assignments, and unique drops for both realms.                                        |
-| Define UI wireframes               | Gap         | Commit to exact columns for comparison table. Decide configuration panel layout. Keep scope small.                                  |
-| Build state reader                 | Gap         | Implement character state import. Depends on API inventory.                                                                         |
-| Build calculation engine           | Gap         | Pure functions: loadout config in, per-NPC metrics out. Testable independently of the game.                                         |
-| Build UI                           | Gap         | Comparison table, config panel, per-target detail view.                                                                             |
+| Define UI wireframes               | **Done**    | Columns defined: NPC, Area, Level, XP/hr, GP/hr, Success %, Double %. Realm tabs for filtering.                                    |
+| Build state reader                 | **Done**    | `readLoadout`, `readTargets`, `readAreas`, `readAllMasteryLevels` in `state/reader.ts`.                                            |
+| Build calculation engine           | **Done**    | Pure functions in `calc/thieving.ts` and `calc/aggregator.ts`. Fully tested.                                                        |
+| Build UI                           | **Partial** | Comparison table (4.1) done. Config panel (4.2) and per-target detail (4.3) remaining.                                              |
 | Set up dev/test loop               | Gap         | Establish a way to load the mod into the game with a save file that has varied mastery levels for realistic testing.                |
-| Create `assets/style.css`          | Ready       | Referenced in manifest but doesn't exist yet. Needed before any UI work.                                                            |
+| Create `assets/style.css`          | **Done**    | Styled comparison table with dark theme matching Melvor aesthetic. Loaded via manifest.                                             |
 
 ---
 

@@ -116,11 +116,17 @@ function readEquipment(player: Player): EquippedItemEntry[] {
   return entries;
 }
 
-function readMasteryLevel(thieving: Thieving): number {
-  if (!thieving.currentNPC) {
-    throw new Error('Missing target NPC');
+/**
+ * Reads mastery levels for all thieving NPCs.
+ *
+ * @returns Map of NPC ID to mastery level.
+ */
+export function readAllMasteryLevels(thieving: Thieving): Map<string, number> {
+  const levels = new Map<string, number>();
+  for (const npc of thieving.actions.allObjects) {
+    levels.set(npc.id, thieving.getMasteryLevel(npc));
   }
-  return thieving.getMasteryLevel(thieving.currentNPC);
+  return levels;
 }
 
 function readMasteryPoolPercent(
@@ -261,11 +267,17 @@ function readActiveSynergy(player: Player): SummoningSynergyInfo | undefined {
   };
 }
 
+/**
+ * Reads the player's current thieving loadout from the game state.
+ *
+ * Mastery level defaults to 1 — callers should set per-NPC mastery via
+ * {@link readAllMasteryLevels} before passing the loadout to the aggregator.
+ */
 export function readLoadout(game: Game): ThievingLoadout {
   const player = game.combat.player;
   return {
     equipment: readEquipment(player),
-    masteryLevel: readMasteryLevel(game.thieving),
+    masteryLevel: 1,
     melvorMasteryPoolPercent: readMasteryPoolPercent(
       game.thieving,
       game.realms,
