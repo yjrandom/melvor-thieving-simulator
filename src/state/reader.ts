@@ -1,24 +1,24 @@
 import type {
-    AgilityObstacle,
-    AgilityPillar,
-    AstrologyConstellation,
-    EquippedItemEntry,
-    LootItem,
-    Modifier,
-    PetInfo,
-    Potion,
-    Prayer,
-    ShopPurchase,
-    SummoningSynergyInfo,
-    ThievingArea,
-    ThievingLoadout,
-    ThievingTarget,
+  AgilityObstacle,
+  AgilityPillar,
+  AstrologyConstellation,
+  EquippedItemEntry,
+  LootItem,
+  Modifier,
+  PetInfo,
+  Potion,
+  Prayer,
+  ShopPurchase,
+  SummoningSynergyInfo,
+  ThievingArea,
+  ThievingLoadout,
+  ThievingTarget,
 } from '../calc/types';
 import { RealmName } from '../calc/types';
 import {
-    ThievingBoostId,
-    ThievingEquipmentSlotId,
-    ThievingRealmId,
+  ThievingBoostId,
+  ThievingEquipmentSlotId,
+  ThievingRealmId,
 } from '../constants/item-ids';
 
 type CurrencyType = 'gp' | 'ap';
@@ -116,9 +116,9 @@ function readEquipment(player: Player): EquippedItemEntry[] {
   return entries;
 }
 
-function readMasteryLevel(thieving: Thieving,): number {
+function readMasteryLevel(thieving: Thieving): number {
   if (!thieving.currentNPC) {
-    throw new Error('Missing target NPC')
+    throw new Error('Missing target NPC');
   }
   return thieving.getMasteryLevel(thieving.currentNPC);
 }
@@ -151,20 +151,14 @@ function readActivePotion(
 
 function readActivePrayers(
   activePrayers: Set<ActivePrayer>,
-): [Prayer] | [Prayer, Prayer] | undefined {
-  if (activePrayers.size === 0) {
-    return undefined;
-  }
+): Set<Prayer> | undefined {
+  const prayers = new Set<Prayer>();
 
-  if (activePrayers.size === 1) {
-    return [activePrayers.values().next().value as Prayer];
-  }
+  activePrayers.forEach((prayer) => {
+    prayers.add({ id: prayer.id, name: prayer.name });
+  });
 
-  if (activePrayers.size === 1) {
-    return [activePrayers.values().next().value as Prayer, activePrayers.values().next().value as Prayer];
-  }
-
-
+  return prayers;
 }
 
 const REALM_IDS = ['melvorD:Melvor', 'melvorItA:Abyssal'] as const;

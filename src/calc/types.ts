@@ -117,7 +117,7 @@ export interface ThievingLoadout {
   melvorMasteryPoolPercent: number;
   abyssalMasteryPoolPercent: number;
   activePotion: Potion | undefined;
-  activePrayers: [Prayer] | [Prayer, Prayer] | undefined;
+  activePrayers: Set<Prayer> | undefined;
   agilityObstacles: AgilityObstacle[];
   agilityPillars: AgilityPillar[];
   astrologyConstellations: AstrologyConstellation[];
@@ -167,6 +167,44 @@ export interface ThievingBoosts {
 
   /** Auto-sell price multiplier (0 = disabled). When active, common drops are sold at this factor times base price. */
   autoSellMultiplier: number;
+}
+
+/**
+ * Partial overlay on {@link ThievingLoadout} representing user-specified hypothetical changes.
+ *
+ * Present fields replace the imported values. Absent fields (undefined) preserve the imported
+ * values. Fields set to `null` explicitly clear the imported value to its empty state.
+ *
+ * Collection fields keyed by slot (equipment, agility) support per-slot granularity:
+ * only the specified slots are overridden; unmentioned slots keep their imported values.
+ */
+export interface LoadoutOverrides {
+  /** Per-slot equipment overrides. Keyed by slot ID. `null` clears the slot. */
+  equipment?: Partial<Record<string, EquippedItemEntry | null>>;
+
+  /** Override mastery level for the target NPC. */
+  masteryLevel?: number;
+
+  /** Override active potion. `null` clears the potion. */
+  activePotion?: Potion | null;
+
+  /** Override active prayers. `null` clears all prayers. */
+  activePrayers?: Set<Prayer> | null;
+
+  /** Per-slot agility obstacle overrides. Keyed by slot number. `null` clears the slot. */
+  agilityObstacles?: Partial<Record<number, AgilityObstacle | null>>;
+
+  /** Per-slot agility pillar overrides. Keyed by slot number. `null` clears the slot. */
+  agilityPillars?: Partial<Record<number, AgilityPillar | null>>;
+
+  /** Override active summoning synergy. `null` clears the synergy. */
+  activeSummoningSynergy?: SummoningSynergyInfo | null;
+
+  /** Override thieving skill level. */
+  skillLevel?: number;
+
+  /** Override abyssal skill level. */
+  abyssalSkillLevel?: number;
 }
 
 export interface ThievingResult {
