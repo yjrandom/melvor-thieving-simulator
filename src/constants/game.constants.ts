@@ -18,4 +18,7 @@ export const DEFAULT_BOOSTS: ThievingBoosts = {
   stunDurationReductionPercent: 0,
   areaUniqueBonusPercent: 0,
   areaUniqueBonus: 0,
+  currencyMultiplierBonus: 0,
+  itemMultiplierBonus: 0,
+  autoSellMultiplier: 0,
 };

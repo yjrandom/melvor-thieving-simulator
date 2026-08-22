@@ -96,7 +96,10 @@ export function calcThieving(
 
   const avgCurrencyPerSuccess = calcAvgCurrencyPerSuccess(target, boosts);
   const currencyPerHour =
-    successfulActionsPerHour * avgCurrencyPerSuccess * (1 + doubleChance);
+    successfulActionsPerHour *
+    avgCurrencyPerSuccess *
+    (1 + doubleChance) *
+    (1 + boosts.currencyMultiplierBonus);
 
   return {
     successRate,

@@ -158,6 +158,15 @@ export interface ThievingBoosts {
 
   /** Percentage bonus to area unique chance */
   areaUniqueBonusPercent: number;
+
+  /** Additive bonus to currency multiplier. Applied as (1 + value) in calc engine. Default 0 means no change. */
+  currencyMultiplierBonus: number;
+
+  /** Additive bonus to item quantity multiplier. Applied as (1 + value) in calc engine. Default 0 means no change. */
+  itemMultiplierBonus: number;
+
+  /** Auto-sell price multiplier (0 = disabled). When active, common drops are sold at this factor times base price. */
+  autoSellMultiplier: number;
 }
 
 export interface ThievingResult {

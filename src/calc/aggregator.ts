@@ -1,5 +1,9 @@
 import { DEFAULT_BOOSTS } from '../constants/game.constants';
-import { ThievingBoostId, ThievingRealmId } from '../constants/item-ids';
+import {
+  SynergyFamiliarId,
+  ThievingBoostId,
+  ThievingRealmId,
+} from '../constants/item-ids';
 import type {
   AgilityObstacle,
   AgilityPillar,
@@ -11,6 +15,10 @@ import type {
   ThievingBoosts,
   ThievingLoadout,
 } from './types';
+
+const DEVIL_GAMBLE_CURRENCY_BONUS = 0.35;
+const DEVIL_GAMBLE_ITEM_BONUS = 0.9;
+const AUTO_SELL_PRICE_MULTIPLIER = 15;
 
 /**
  * Aggregates all applicable thieving boosts from a player loadout and target NPC.
@@ -29,7 +37,7 @@ export class Aggregator {
    * game type definitions. Must be verified at runtime (Phase 5.2).
    */
   private readonly MODIFIER_BOOST_MAP: Readonly<
-    Record<ThievingBoostId, keyof ThievingBoosts>
+    Partial<Record<ThievingBoostId, keyof ThievingBoosts>>
   > = {
     [ThievingBoostId.STEALTH]: 'stealth',
     [ThievingBoostId.FLAT_SKILL_INTERVAL]: 'intervalReductionMs',
@@ -37,7 +45,6 @@ export class Aggregator {
     [ThievingBoostId.AREA_UNIQUE_CHANCE]: 'areaUniqueBonus',
     [ThievingBoostId.AREA_UNIQUE_CHANCE_PERCENT]: 'areaUniqueBonusPercent',
     [ThievingBoostId.STUN_AVOID_CHANCE]: 'stunAvoidancePercent',
-    [ThievingBoostId.IGNORE_THIEVING_DAMAGE_CHANCE]: 'stunAvoidancePercent',
     [ThievingBoostId.THIEVING_STUN_INTERVAL]: 'stunDurationReductionPercent',
     [ThievingBoostId.SKILL_XP]: 'xpBonusPercent',
     [ThievingBoostId.GLOBAL_ITEM_DOUBLING_CHANCE]:
@@ -268,7 +275,11 @@ export class Aggregator {
   }
 
   /**
-   * Collects summoning synergy modifier contributions.
+   * Collects summoning synergy modifier contributions and special synergy effects.
+   *
+   * Standard modifiers are resolved through {@link resolveModifiers}. Complex synergies
+   * (Devil gamble, auto-sell) are detected by familiar IDs and expressed as expected-value
+   * multipliers on dedicated {@link ThievingBoosts} fields.
    *
    * @param {SummoningSynergyInfo | undefined} activeSynergy Active synergy info, or undefined if no synergy is active.
    * @param {string} targetRealmId Realm ID of the target NPC for scope filtering.
@@ -282,7 +293,52 @@ export class Aggregator {
       return {};
     }
 
-    return this.resolveModifiers(activeSynergy.modifiers, targetRealmId);
+    return this.mergePartials(
+      this.resolveModifiers(activeSynergy.modifiers, targetRealmId),
+      this.resolveSpecialSynergy(activeSynergy),
+    );
+  }
+
+  /**
+   * Detects complex synergies that cannot be expressed as standard modifiers
+   * and returns their expected-value boost contributions.
+   */
+  private resolveSpecialSynergy(
+    synergy: SummoningSynergyInfo,
+  ): Partial<ThievingBoosts> {
+    if (this.isDevilGambleSynergy(synergy)) {
+      return {
+        currencyMultiplierBonus: DEVIL_GAMBLE_CURRENCY_BONUS,
+        itemMultiplierBonus: DEVIL_GAMBLE_ITEM_BONUS,
+      };
+    }
+    if (this.isAutoSellSynergy(synergy)) {
+      return {
+        autoSellMultiplier: AUTO_SELL_PRICE_MULTIPLIER,
+      };
+    }
+    return {};
+  }
+
+  private isDevilGambleSynergy(synergy: SummoningSynergyInfo): boolean {
+    return (
+      this.hasFamiliars(synergy, SynergyFamiliarId.LEPRECHAUN, SynergyFamiliarId.DEVIL) ||
+      this.hasFamiliars(synergy, SynergyFamiliarId.ABYSSAL_LEPRECHAUN, SynergyFamiliarId.ABYSSAL_DEVIL)
+    );
+  }
+
+  private isAutoSellSynergy(synergy: SummoningSynergyInfo): boolean {
+    return (
+      this.hasFamiliars(synergy, SynergyFamiliarId.LEPRECHAUN, SynergyFamiliarId.MONKEY) ||
+      this.hasFamiliars(synergy, SynergyFamiliarId.ABYSSAL_LEPRECHAUN, SynergyFamiliarId.ABYSSAL_MONKEY)
+    );
+  }
+
+  private hasFamiliars(synergy: SummoningSynergyInfo, id1: string, id2: string): boolean {
+    return (
+      (synergy.summon1Id === id1 && synergy.summon2Id === id2) ||
+      (synergy.summon1Id === id2 && synergy.summon2Id === id1)
+    );
   }
 
   // ===========================================================================

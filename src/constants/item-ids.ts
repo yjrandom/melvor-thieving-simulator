@@ -40,6 +40,19 @@ export enum ThievingEquipmentSlotId {
   ENHANCEMENT3 = 'melvorD:Enhancement3',
 }
 
+/**
+ * Summoning familiar product IDs for synergies requiring special aggregator logic.
+ * IDs are game item references — must be verified at runtime (Phase 5.2).
+ */
+export enum SynergyFamiliarId {
+  LEPRECHAUN = 'melvorD:Leprechaun',
+  DEVIL = 'melvorD:Devil',
+  MONKEY = 'melvorD:Monkey',
+  ABYSSAL_LEPRECHAUN = 'melvorItA:AbyssalLeprechaun',
+  ABYSSAL_DEVIL = 'melvorItA:AbyssalDevil',
+  ABYSSAL_MONKEY = 'melvorItA:AbyssalMonkey',
+}
+
 export enum ThievingBoostId {
   STEALTH = 'melvorD:thievingStealth',
   FLAT_SKILL_INTERVAL = 'melvorD:flatSkillInterval',

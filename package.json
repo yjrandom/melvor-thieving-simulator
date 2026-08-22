@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "test": "jest",
-    "build": "tsc --noEmit && webpack && node scripts/bundleHtml.mts",
+    "build": "tsc --noEmit -p tsconfig.json && webpack && node scripts/bundleHtml.mts",
     "zip": "node scripts/zip.mts",
     "buildzip": "pnpm build && pnpm zip"
   },

@@ -1,40 +1,14 @@
 {
-  // Visit https://aka.ms/tsconfig to read more about this file
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    // File Layout
     "rootDir": "./src",
     "outDir": "./dist",
-
-    // Environment Settings
-    // See also https://aka.ms/tsconfig/module
-    "module": "esnext",
-    "moduleResolution": "bundler",
-    "target": "esnext",
-    // For nodejs:
-    // "lib": ["esnext"],
-    "types": ["jest", "archiver", "node"],
-
-    // Other Outputs
-    "sourceMap": true,
-
-    // Stricter Typechecking Options
-    "noUncheckedIndexedAccess": true,
-    "exactOptionalPropertyTypes": true,
-
-    // Style Options
-    // "noImplicitReturn": true,
-    // "noImplicitOverride": true,
-    // "noUnusedLocals": true,
-    // "noUnusedParameters": true,
-    // "noFallthroughCasesInSwitch": true,
-    // "noPropertyAccessFromIndexSignature": true,
-
-    // Recommended Options
-    "strict": true,
-    "jsx": "react-jsx",
-    "isolatedModules": true,
-    "skipLibCheck": true,
-    "verbatimModuleSyntax": true
+    "types": ["archiver", "node"]
   },
-  "exclude": ["./scripts"]
+  "exclude": [
+    "./scripts",
+    "**/*.spec.ts",
+    "**/__fixtures__",
+    "./jest.config.mts"
+  ]
 }
