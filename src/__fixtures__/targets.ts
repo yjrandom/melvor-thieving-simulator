@@ -1,4 +1,4 @@
-import { type ThievingTarget } from '../calc/types';
+import type { ThievingTarget } from '../calc/types';
 import { ThievingRealmId } from '../constants/item-ids';
 
 export const MELVOR_TARGETS: ThievingTarget[] = [

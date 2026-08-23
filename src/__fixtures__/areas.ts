@@ -1,5 +1,8 @@
-import { RealmName, type ThievingArea } from '../calc/types';
-import { AREA_UNIQUE_BASE_CHANCE } from '../constants/game.constants';
+import type { ThievingArea } from '../calc/types';
+import {
+  AREA_UNIQUE_BASE_CHANCE,
+  RealmName,
+} from '../constants/game.constants';
 
 export const MELVOR_AREAS: ThievingArea[] = [
   {
