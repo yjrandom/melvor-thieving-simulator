@@ -39,7 +39,7 @@ MUST consult before design work, or implementation that affect design, if releva
 - `specs/constitution.md` — design spec: feature scope, mechanics, architecture, modding conventions, type definitions
 - `specs/formulas.md` — thieving formulas and mechanics reference
 - `specs/npc-data.md` — NPC stats and area data for both realms
-- `specs/tasks.md` — planned work tracker; update status to Done and check boxes when completing tasks
+- `specs/tasks/` — planned work tracker, one file per phase; `README.md` is the index. Update status to Done and check boxes when completing tasks
 
 ### Source of truth
 - `constitution.md` should be the sole source of truth. If other specs disagree, confere to it, but highlight the discrapencies.
