@@ -7,7 +7,7 @@ import {
   readSynergyOptions,
   readTargets,
 } from './state/reader';
-import MainModal from './templates/MainModal';
+import MainModal from './templates/main.template';
 
 export function setup(ctx: Modding.ModContext) {
   ctx.onModsLoaded(() => {

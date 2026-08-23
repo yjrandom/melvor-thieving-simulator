@@ -1,0 +1,45 @@
+<template id="ts-equipment-tab">
+  <div class="ts-equip-tab">
+    <div class="ts-equip-paperdoll">
+      <div
+        v-for="slot in equipmentSlots"
+        class="ts-equip-cell"
+        :class="{
+          'ts-equip-cell--active': selectedSlot === slot.slotId,
+          'ts-equip-cell--filled': slot.hasItem,
+          'ts-equip-cell--overridden': slot.isOverridden
+        }"
+        :style="{ gridRow: slot.gridRow + 1, gridColumn: slot.gridCol + 1 }"
+        @click="selectSlot(slot.slotId)"
+      >
+        <span class="ts-equip-cell-label" v-text="slot.slotName"></span>
+        <span
+          class="ts-equip-cell-item"
+          :class="{ 'ts-equip-cell-item--empty': !slot.hasItem }"
+          v-text="slot.hasItem ? slot.itemName : 'Empty'"
+        ></span>
+      </div>
+    </div>
+    <div class="ts-equip-picker" v-if="selectedSlot">
+      <div class="ts-equip-picker-header">
+        <span v-text="selectedSlotName"></span>
+        <button class="ts-equip-picker-clear" @click="clearSlot">Clear</button>
+      </div>
+      <div class="ts-equip-picker-list">
+        <div class="ts-equip-picker-empty" v-if="!slotOptions.length">No items available for this slot.</div>
+        <button
+          v-for="option in slotOptions"
+          class="ts-equip-picker-item"
+          @click="selectItem(option)"
+          v-text="option.itemName"
+        ></button>
+      </div>
+    </div>
+    <div class="ts-equip-picker ts-equip-picker--empty" v-else>
+      <span class="ts-equip-picker-placeholder">Select a slot to change equipment.</span>
+    </div>
+  </div>
+  <div class="ts-equip-actions">
+    <button class="ts-btn ts-btn--secondary" @click="resetEquipment">Reset Equipment</button>
+  </div>
+</template>

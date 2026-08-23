@@ -17,7 +17,7 @@ import {
   buildSynergyOptions,
   getSlotDisplayName,
   SLOT_GRID_POSITIONS,
-} from './MainModal';
+} from './main.template';
 
 function makeLoadout(
   overrides: Partial<ThievingLoadout> = {},
@@ -93,7 +93,9 @@ describe('MainModal', () => {
       const rows = buildRows(targets, loadout, masteryLevels);
       const manRow = rows.find((r) => r.target.name === 'Man')!;
       const golbinRow = rows.find((r) => r.target.name === 'Golbin')!;
-      expect(manRow.result.successRate).toBeGreaterThan(golbinRow.result.successRate);
+      expect(manRow.result.successRate).toBeGreaterThan(
+        golbinRow.result.successRate,
+      );
     });
 
     it('should set currency label based on target currency type', () => {
@@ -142,8 +144,18 @@ describe('MainModal', () => {
     it('should map equipment entries to display entries with slot names', () => {
       const loadout = makeLoadout({
         equipment: [
-          { slotId: ThievingEquipmentSlotId.GLOVES, itemId: 'melvorF:Gloves1', itemName: 'Thieving Gloves', modifiers: [] },
-          { slotId: ThievingEquipmentSlotId.CAPE, itemId: 'melvorF:Cape1', itemName: "Thiever's Cape", modifiers: [] },
+          {
+            slotId: ThievingEquipmentSlotId.GLOVES,
+            itemId: 'melvorF:Gloves1',
+            itemName: 'Thieving Gloves',
+            modifiers: [],
+          },
+          {
+            slotId: ThievingEquipmentSlotId.CAPE,
+            itemId: 'melvorF:Cape1',
+            itemName: "Thiever's Cape",
+            modifiers: [],
+          },
         ],
       });
       const display = buildConfigDisplay(loadout);
@@ -156,7 +168,12 @@ describe('MainModal', () => {
     it('should fall back to ID suffix for unknown equipment slot IDs', () => {
       const loadout = makeLoadout({
         equipment: [
-          { slotId: 'melvorD:CustomSlot', itemId: 'item1', itemName: 'Custom Item', modifiers: [] },
+          {
+            slotId: 'melvorD:CustomSlot',
+            itemId: 'item1',
+            itemName: 'Custom Item',
+            modifiers: [],
+          },
         ],
       });
       const display = buildConfigDisplay(loadout);
@@ -187,12 +204,16 @@ describe('MainModal', () => {
     });
 
     it('should show "None" when no prayers are active (undefined)', () => {
-      const display = buildConfigDisplay(makeLoadout({ activePrayers: undefined }));
+      const display = buildConfigDisplay(
+        makeLoadout({ activePrayers: undefined }),
+      );
       expect(display.prayerSummary).toBe('None');
     });
 
     it('should show "None" when prayers set is empty', () => {
-      const display = buildConfigDisplay(makeLoadout({ activePrayers: new Set() }));
+      const display = buildConfigDisplay(
+        makeLoadout({ activePrayers: new Set() }),
+      );
       expect(display.prayerSummary).toBe('None');
     });
 
@@ -265,7 +286,9 @@ describe('MainModal', () => {
         },
       });
       const display = buildConfigDisplay(loadout);
-      expect(display.synergy).toBe('Auto-sells common drops for 15x base price');
+      expect(display.synergy).toBe(
+        'Auto-sells common drops for 15x base price',
+      );
     });
 
     it('should format mastery pool percentages', () => {
@@ -359,8 +382,20 @@ describe('MainModal', () => {
 
   describe('buildSynergyOptions', () => {
     const synergies: SummoningSynergyInfo[] = [
-      { summon1Id: 's1', summon2Id: 's2', name: 'Leprechaun + Monkey', description: 'Auto-sell', modifiers: [] },
-      { summon1Id: 's3', summon2Id: 's4', name: 'Leprechaun + Devil', description: 'Gamble', modifiers: [] },
+      {
+        summon1Id: 's1',
+        summon2Id: 's2',
+        name: 'Leprechaun + Monkey',
+        description: 'Auto-sell',
+        modifiers: [],
+      },
+      {
+        summon1Id: 's3',
+        summon2Id: 's4',
+        name: 'Leprechaun + Devil',
+        description: 'Gamble',
+        modifiers: [],
+      },
     ];
 
     it('should mark the active synergy as selected', () => {
@@ -398,9 +433,24 @@ describe('MainModal', () => {
       });
       const result = buildAgilitySlots(loadout, {});
       expect(result).toHaveLength(3);
-      expect(result[0]).toMatchObject({ slot: 0, name: 'Rocky Road', type: 'obstacle', isCleared: false });
-      expect(result[1]).toMatchObject({ slot: 1, name: 'Muddy Path', type: 'obstacle', isCleared: false });
-      expect(result[2]).toMatchObject({ slot: 0, name: 'Stone Pillar', type: 'pillar', isCleared: false });
+      expect(result[0]).toMatchObject({
+        slot: 0,
+        name: 'Rocky Road',
+        type: 'obstacle',
+        isCleared: false,
+      });
+      expect(result[1]).toMatchObject({
+        slot: 1,
+        name: 'Muddy Path',
+        type: 'obstacle',
+        isCleared: false,
+      });
+      expect(result[2]).toMatchObject({
+        slot: 0,
+        name: 'Stone Pillar',
+        type: 'pillar',
+        isCleared: false,
+      });
     });
 
     it('should mark cleared obstacle slots', () => {

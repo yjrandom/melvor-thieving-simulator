@@ -1,0 +1,47 @@
+<template id="ts-modal">
+  <div class="ts-overlay" v-show="isOpen" @click.self="setIsOpen">
+    <div class="ts-modal">
+      <div class="ts-header">
+        <h2 class="ts-title">Thieving Simulator</h2>
+        <div class="ts-header-actions">
+          <div class="ts-realm-tabs" v-if="hasImported && activeTab === 'simulate'">
+            <button class="ts-tab" :class="{ 'ts-tab--active': realmFilter === 'all' }" @click="setRealmFilter('all')">All</button>
+            <button class="ts-tab" :class="{ 'ts-tab--active': realmFilter === 'melvor' }" @click="setRealmFilter('melvor')">Melvor</button>
+            <button class="ts-tab" :class="{ 'ts-tab--active': realmFilter === 'abyssal' }" @click="setRealmFilter('abyssal')">Abyssal</button>
+          </div>
+          <button class="ts-close" @click="setIsOpen">&times;</button>
+        </div>
+      </div>
+      <div class="ts-modal-content">
+        <div class="ts-sidebar" v-if="hasImported">
+          <button class="ts-sidebar-tab" :class="{ 'ts-sidebar-tab--active': activeTab === 'simulate' }" @click="setActiveTab('simulate')">
+            <svg class="ts-sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
+              <rect x="2" y="10" width="4" height="8" rx="1"/>
+              <rect x="8" y="6" width="4" height="12" rx="1"/>
+              <rect x="14" y="2" width="4" height="16" rx="1"/>
+            </svg>
+            Sim
+          </button>
+          <button class="ts-sidebar-tab" :class="{ 'ts-sidebar-tab--active': activeTab === 'equipment' }" @click="setActiveTab('equipment')">
+            <svg class="ts-sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 1l2 5h5l-4 3 1.5 5L10 11l-4.5 3L7 9 3 6h5z"/>
+            </svg>
+            Equip
+          </button>
+          <button class="ts-sidebar-tab" :class="{ 'ts-sidebar-tab--active': activeTab === 'config' }" @click="setActiveTab('config')">
+            <svg class="ts-sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 2a1.5 1.5 0 011.5 1.5v1.07a5.97 5.97 0 011.82 1.06l.93-.54a1.5 1.5 0 012.06.55l.5.87a1.5 1.5 0 01-.55 2.05l-.93.54a6.02 6.02 0 010 2.1l.93.54a1.5 1.5 0 01.55 2.05l-.5.87a1.5 1.5 0 01-2.06.55l-.93-.54a5.97 5.97 0 01-1.82 1.06v1.07A1.5 1.5 0 0110 18a1.5 1.5 0 01-1.5-1.5v-1.07a5.97 5.97 0 01-1.82-1.06l-.93.54a1.5 1.5 0 01-2.06-.55l-.5-.87a1.5 1.5 0 01.55-2.05l.93-.54a6.02 6.02 0 010-2.1l-.93-.54a1.5 1.5 0 01-.55-2.05l.5-.87a1.5 1.5 0 012.06-.55l.93.54A5.97 5.97 0 018.5 4.57V3.5A1.5 1.5 0 0110 2zm0 5.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/>
+            </svg>
+            Config
+          </button>
+        </div>
+        <div class="ts-modal-body">
+          <div v-if="activeTab === 'simulate' && !detailDisplay" v-scope="SimulateTab()"></div>
+          <div v-if="activeTab === 'simulate' && detailDisplay" class="ts-detail" v-scope="DetailView()"></div>
+          <div v-if="activeTab === 'equipment'" class="ts-equip-tab-wrap" v-scope="EquipmentTab()"></div>
+          <div v-if="activeTab === 'config'" class="ts-config-tab-wrap" v-scope="ConfigTab()"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

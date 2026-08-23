@@ -147,6 +147,10 @@ interface MainModalScope {
   detailDisplay: NpcDetailDisplay | null;
   confidenceAttempts: number;
   confidenceInput: string;
+  SimulateTab: () => ComponentProps;
+  DetailView: () => ComponentProps;
+  EquipmentTab: () => ComponentProps;
+  ConfigTab: () => ComponentProps;
   setIsOpen: () => void;
   setActiveTab: (tab: ModalTab) => void;
   setRealmFilter: (filter: RealmFilter) => void;
@@ -638,6 +642,10 @@ export default function MainModal(
     detailDisplay: null,
     confidenceAttempts: 1000,
     confidenceInput: '1000',
+    SimulateTab: () => ({ $template: '#ts-simulate-tab' }),
+    DetailView: () => ({ $template: '#ts-detail-view' }),
+    EquipmentTab: () => ({ $template: '#ts-equipment-tab' }),
+    ConfigTab: () => ({ $template: '#ts-config-tab' }),
 
     setIsOpen() {
       this.isOpen = !this.isOpen;
