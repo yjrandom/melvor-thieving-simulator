@@ -222,7 +222,7 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 **Why:** Import button + override controls. Where the user selects hypothetical loadouts.
 
 - [x] "Import from character" button
-- [ ] Equipment slot selectors (thieving-relevant slots only)
+- [x] Equipment slot selectors (thieving-relevant slots only)
 - [ ] Potion selector (tier dropdown)
 - [ ] Prayer toggles
 - [ ] Agility course selector

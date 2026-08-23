@@ -179,8 +179,8 @@ export interface ThievingBoosts {
  * only the specified slots are overridden; unmentioned slots keep their imported values.
  */
 export interface LoadoutOverrides {
-  /** Per-slot equipment overrides. Keyed by slot ID. `null` clears the slot. */
-  equipment?: Partial<Record<string, EquippedItemEntry | null>>;
+  /** Per-slot equipment overrides. Keyed by slot ID. `null` in the entry clears the slot. `null` at the root level clears all slots */
+  equipment?: Partial<Record<string, EquippedItemEntry | null>> | null;
 
   /** Override mastery level for the target NPC. */
   masteryLevel?: number;
@@ -205,6 +205,13 @@ export interface LoadoutOverrides {
 
   /** Override abyssal skill level. */
   abyssalSkillLevel?: number;
+}
+
+/** A selectable equipment item for a given slot, decoupled from game objects. */
+export interface EquipmentOption {
+  itemId: string;
+  itemName: string;
+  modifiers: Modifier[];
 }
 
 export interface ThievingResult {

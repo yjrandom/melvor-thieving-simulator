@@ -1,6 +1,9 @@
 import { Aggregator } from '../calc/aggregator';
 import { calcThieving } from '../calc/thieving';
 import type {
+  EquipmentOption,
+  EquippedItemEntry,
+  LoadoutOverrides,
   ThievingArea,
   ThievingLoadout,
   ThievingResult,
@@ -9,6 +12,7 @@ import type {
 import { RealmName } from '../calc/types';
 import type { ThievingRealmId } from '../constants/item-ids';
 import { ThievingEquipmentSlotId } from '../constants/item-ids';
+import { applyOverrides } from '../state/overrides';
 import { formatNumber, formatPercent } from '../utils/number-utils';
 
 export enum SortColumn {
@@ -28,6 +32,8 @@ export enum SortDirection {
 
 export type RealmFilter = 'all' | 'melvor' | 'abyssal';
 
+export type ModalTab = 'simulate' | 'equipment';
+
 export interface ComparisonRow {
   target: ThievingTarget;
   result: ThievingResult;
@@ -44,6 +50,16 @@ export interface EquipmentDisplayEntry {
   slotName: string;
   /** Game item name. */
   itemName: string;
+}
+
+export interface EquipmentSlotDisplay {
+  slotId: string;
+  slotName: string;
+  itemName: string;
+  hasItem: boolean;
+  isOverridden: boolean;
+  gridRow: number;
+  gridCol: number;
 }
 
 export interface ConfigDisplay {
@@ -76,23 +92,34 @@ export interface MainModalInputProps {
   targets: ThievingTarget[];
   areas: ThievingArea[];
   onImport: () => ImportResult;
+  equipmentOptions: Record<string, EquipmentOption[]>;
 }
 
 interface MainModalScope {
   isOpen: boolean;
   hasImported: boolean;
+  activeTab: ModalTab;
   configDisplay: ConfigDisplay | null;
   realmFilter: RealmFilter;
   sortColumn: SortColumn;
   sortDirection: SortDirection;
   allRows: ComparisonRow[];
   filteredRows: ComparisonRow[];
+  equipmentSlots: EquipmentSlotDisplay[];
+  selectedSlot: string | null;
+  slotOptions: EquipmentOption[];
+  selectedSlotName: string;
   setIsOpen: () => void;
+  setActiveTab: (tab: ModalTab) => void;
   setRealmFilter: (filter: RealmFilter) => void;
   toggleSort: (column: SortColumn) => void;
   sortIndicator: (column: SortColumn) => string;
   recomputeFilteredRows: () => void;
   importLoadout: () => void;
+  selectSlot: (slotId: string) => void;
+  selectItem: (option: EquipmentOption | null) => void;
+  clearSlot: () => void;
+  resetEquipment: () => void;
 }
 
 const SLOT_DISPLAY_NAMES: Readonly<Record<string, string>> = {
@@ -115,6 +142,31 @@ const SLOT_DISPLAY_NAMES: Readonly<Record<string, string>> = {
   [ThievingEquipmentSlotId.ENHANCEMENT1]: 'Enhance 1',
   [ThievingEquipmentSlotId.ENHANCEMENT2]: 'Enhance 2',
   [ThievingEquipmentSlotId.ENHANCEMENT3]: 'Enhance 3',
+};
+
+/** Paper-doll grid positions matching Melvor's equipment screen layout (3-column). */
+export const SLOT_GRID_POSITIONS: Readonly<
+  Record<string, { row: number; col: number }>
+> = {
+  [ThievingEquipmentSlotId.HELMET]: { row: 0, col: 1 },
+  [ThievingEquipmentSlotId.CAPE]: { row: 1, col: 0 },
+  [ThievingEquipmentSlotId.AMULET]: { row: 1, col: 1 },
+  [ThievingEquipmentSlotId.QUIVER]: { row: 1, col: 2 },
+  [ThievingEquipmentSlotId.WEAPON]: { row: 2, col: 0 },
+  [ThievingEquipmentSlotId.PLATEBODY]: { row: 2, col: 1 },
+  [ThievingEquipmentSlotId.SHIELD]: { row: 2, col: 2 },
+  [ThievingEquipmentSlotId.PLATELEGS]: { row: 3, col: 1 },
+  [ThievingEquipmentSlotId.GLOVES]: { row: 4, col: 0 },
+  [ThievingEquipmentSlotId.BOOTS]: { row: 4, col: 1 },
+  [ThievingEquipmentSlotId.RING]: { row: 4, col: 2 },
+  [ThievingEquipmentSlotId.PASSIVE]: { row: 5, col: 0 },
+  [ThievingEquipmentSlotId.SUMMON1]: { row: 6, col: 0 },
+  [ThievingEquipmentSlotId.SUMMON2]: { row: 6, col: 1 },
+  [ThievingEquipmentSlotId.CONSUMABLE]: { row: 7, col: 0 },
+  [ThievingEquipmentSlotId.GEM]: { row: 7, col: 1 },
+  [ThievingEquipmentSlotId.ENHANCEMENT1]: { row: 8, col: 0 },
+  [ThievingEquipmentSlotId.ENHANCEMENT2]: { row: 8, col: 1 },
+  [ThievingEquipmentSlotId.ENHANCEMENT3]: { row: 8, col: 2 },
 };
 
 /**
@@ -177,6 +229,33 @@ export function buildConfigDisplay(loadout: ThievingLoadout): ConfigDisplay {
     melvorPool: formatPercent(loadout.melvorMasteryPoolPercent / 100),
     abyssalPool: formatPercent(loadout.abyssalMasteryPoolPercent / 100),
   };
+}
+
+/** Builds the display state for all equipment slots from the active loadout and overrides. */
+export function buildEquipmentSlots(
+  loadout: ThievingLoadout,
+  overrides: LoadoutOverrides,
+): EquipmentSlotDisplay[] {
+  const equippedBySlot = new Map(
+    loadout.equipment.map((e) => [e.slotId, e]),
+  );
+  const overriddenSlots = new Set(
+    overrides.equipment ? Object.keys(overrides.equipment) : [],
+  );
+
+  return Object.values(ThievingEquipmentSlotId).map((slotId) => {
+    const equipped = equippedBySlot.get(slotId);
+    const pos = SLOT_GRID_POSITIONS[slotId] ?? { row: 0, col: 0 };
+    return {
+      slotId,
+      slotName: getSlotDisplayName(slotId),
+      itemName: equipped?.itemName ?? 'Empty',
+      hasItem: equipped !== undefined,
+      isOverridden: overriddenSlots.has(slotId),
+      gridRow: pos.row,
+      gridCol: pos.col,
+    };
+  });
 }
 
 const SORT_COLUMN_ACCESSOR: Record<
@@ -251,20 +330,36 @@ export default function MainModal(
 ): Component<MainModalScope> {
   let importedLoadout: ThievingLoadout | null = null;
   let importedMasteryLevels: Map<string, number> | null = null;
+  let currentOverrides: LoadoutOverrides = {};
+
+  function getActiveLoadout(): ThievingLoadout {
+    return applyOverrides(importedLoadout!, currentOverrides);
+  }
 
   return {
     $template: '#ts-modal',
     isOpen: false,
     hasImported: false,
+    activeTab: 'simulate' as ModalTab,
     configDisplay: null,
     realmFilter: 'all' as RealmFilter,
     sortColumn: SortColumn.XP_HR,
     sortDirection: SortDirection.DESC,
     allRows: [],
     filteredRows: [],
+    equipmentSlots: [],
+    selectedSlot: null,
+    slotOptions: [],
+    selectedSlotName: '',
 
     setIsOpen() {
       this.isOpen = !this.isOpen;
+    },
+
+    setActiveTab(tab: ModalTab) {
+      this.activeTab = tab;
+      this.selectedSlot = null;
+      this.slotOptions = [];
     },
 
     setRealmFilter(filter: RealmFilter) {
@@ -294,9 +389,14 @@ export default function MainModal(
       const { loadout, masteryLevels } = props.onImport();
       importedLoadout = loadout;
       importedMasteryLevels = masteryLevels;
-      this.configDisplay = buildConfigDisplay(loadout);
-      this.allRows = buildRows(props.targets, loadout, masteryLevels);
+      currentOverrides = {};
+      const activeLoadout = getActiveLoadout();
+      this.configDisplay = buildConfigDisplay(activeLoadout);
+      this.allRows = buildRows(props.targets, activeLoadout, masteryLevels);
+      this.equipmentSlots = buildEquipmentSlots(activeLoadout, currentOverrides);
       this.hasImported = true;
+      this.selectedSlot = null;
+      this.slotOptions = [];
       this.recomputeFilteredRows();
     },
 
@@ -316,6 +416,69 @@ export default function MainModal(
         this.sortColumn,
         this.sortDirection,
       );
+    },
+
+    selectSlot(slotId: string) {
+      this.selectedSlot = slotId;
+      this.selectedSlotName = getSlotDisplayName(slotId);
+      this.slotOptions = props.equipmentOptions[slotId] ?? [];
+    },
+
+    selectItem(option: EquipmentOption | null) {
+      if (!this.selectedSlot || !importedLoadout || !importedMasteryLevels)
+        return;
+
+      const slotId = this.selectedSlot;
+      if (!currentOverrides.equipment) currentOverrides.equipment = {};
+
+      if (option) {
+        const entry: EquippedItemEntry = {
+          slotId,
+          itemId: option.itemId,
+          itemName: option.itemName,
+          modifiers: option.modifiers,
+        };
+        currentOverrides.equipment[slotId] = entry;
+      } else {
+        currentOverrides.equipment[slotId] = null;
+      }
+
+      const activeLoadout = getActiveLoadout();
+      this.configDisplay = buildConfigDisplay(activeLoadout);
+      this.allRows = buildRows(
+        props.targets,
+        activeLoadout,
+        importedMasteryLevels,
+      );
+      this.equipmentSlots = buildEquipmentSlots(
+        activeLoadout,
+        currentOverrides,
+      );
+      this.recomputeFilteredRows();
+    },
+
+    clearSlot() {
+      this.selectItem(null);
+    },
+
+    resetEquipment() {
+      if (!importedLoadout || !importedMasteryLevels) return;
+      currentOverrides = { ...currentOverrides, equipment: null };
+
+      const activeLoadout = getActiveLoadout();
+      this.configDisplay = buildConfigDisplay(activeLoadout);
+      this.allRows = buildRows(
+        props.targets,
+        activeLoadout,
+        importedMasteryLevels,
+      );
+      this.equipmentSlots = buildEquipmentSlots(
+        activeLoadout,
+        currentOverrides,
+      );
+      this.selectedSlot = null;
+      this.slotOptions = [];
+      this.recomputeFilteredRows();
     },
   };
 }

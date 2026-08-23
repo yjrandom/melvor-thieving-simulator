@@ -68,9 +68,13 @@ export function applyOverrides(
  */
 function mergeEquipment(
   imported: EquippedItemEntry[],
-  overrides: Partial<Record<string, EquippedItemEntry | null>>,
+  overrides: Partial<Record<string, EquippedItemEntry | null>> | null,
 ): EquippedItemEntry[] {
   const bySlot = new Map(imported.map((e) => [e.slotId, e]));
+
+  if (overrides === null) {
+    return []
+  }
 
   for (const [slotId, entry] of Object.entries(overrides)) {
     if (entry === null) {

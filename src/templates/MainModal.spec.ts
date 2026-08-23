@@ -1,7 +1,13 @@
 import { MELVOR_TARGETS } from '../__fixtures__/targets';
-import type { ThievingLoadout } from '../calc/types';
+import type { LoadoutOverrides, ThievingLoadout } from '../calc/types';
 import { ThievingEquipmentSlotId } from '../constants/item-ids';
-import { buildConfigDisplay, buildRows, getSlotDisplayName } from './MainModal';
+import {
+  buildConfigDisplay,
+  buildEquipmentSlots,
+  buildRows,
+  getSlotDisplayName,
+  SLOT_GRID_POSITIONS,
+} from './MainModal';
 
 function makeLoadout(
   overrides: Partial<ThievingLoadout> = {},
@@ -308,6 +314,108 @@ describe('MainModal', () => {
       });
       const display = buildConfigDisplay(loadout);
       expect(display.shopPurchaseCount).toBe(2);
+    });
+  });
+
+  describe('buildEquipmentSlots', () => {
+    it('should produce one entry per ThievingEquipmentSlotId', () => {
+      const loadout = makeLoadout();
+      const slots = buildEquipmentSlots(loadout, {});
+      expect(slots).toHaveLength(Object.keys(ThievingEquipmentSlotId).length);
+    });
+
+    it('should show "Empty" for unequipped slots', () => {
+      const loadout = makeLoadout();
+      const slots = buildEquipmentSlots(loadout, {});
+      for (const slot of slots) {
+        expect(slot.itemName).toBe('Empty');
+        expect(slot.hasItem).toBe(false);
+      }
+    });
+
+    it('should show equipped item name and hasItem=true', () => {
+      const loadout = makeLoadout({
+        equipment: [
+          {
+            slotId: ThievingEquipmentSlotId.GLOVES,
+            itemId: 'melvorF:Gloves1',
+            itemName: 'Thieving Gloves',
+            modifiers: [],
+          },
+        ],
+      });
+      const slots = buildEquipmentSlots(loadout, {});
+      const glovesSlot = slots.find(
+        (s) => s.slotId === ThievingEquipmentSlotId.GLOVES,
+      )!;
+      expect(glovesSlot.itemName).toBe('Thieving Gloves');
+      expect(glovesSlot.hasItem).toBe(true);
+    });
+
+    it('should mark overridden slots', () => {
+      const loadout = makeLoadout({
+        equipment: [
+          {
+            slotId: ThievingEquipmentSlotId.CAPE,
+            itemId: 'melvorF:Cape1',
+            itemName: "Thiever's Cape",
+            modifiers: [],
+          },
+        ],
+      });
+      const overrides: LoadoutOverrides = {
+        equipment: {
+          [ThievingEquipmentSlotId.CAPE]: {
+            slotId: ThievingEquipmentSlotId.CAPE,
+            itemId: 'melvorF:Cape2',
+            itemName: 'Chapeau Noir',
+            modifiers: [],
+          },
+        },
+      };
+      const slots = buildEquipmentSlots(loadout, overrides);
+      const capeSlot = slots.find(
+        (s) => s.slotId === ThievingEquipmentSlotId.CAPE,
+      )!;
+      expect(capeSlot.isOverridden).toBe(true);
+    });
+
+    it('should not mark non-overridden slots', () => {
+      const loadout = makeLoadout({
+        equipment: [
+          {
+            slotId: ThievingEquipmentSlotId.GLOVES,
+            itemId: 'melvorF:Gloves1',
+            itemName: 'Thieving Gloves',
+            modifiers: [],
+          },
+        ],
+      });
+      const slots = buildEquipmentSlots(loadout, {});
+      const glovesSlot = slots.find(
+        (s) => s.slotId === ThievingEquipmentSlotId.GLOVES,
+      )!;
+      expect(glovesSlot.isOverridden).toBe(false);
+    });
+
+    it('should assign grid positions from SLOT_GRID_POSITIONS', () => {
+      const loadout = makeLoadout();
+      const slots = buildEquipmentSlots(loadout, {});
+      const helmetSlot = slots.find(
+        (s) => s.slotId === ThievingEquipmentSlotId.HELMET,
+      )!;
+      const pos = SLOT_GRID_POSITIONS[ThievingEquipmentSlotId.HELMET];
+      expect(helmetSlot.gridRow).toBe(pos.row);
+      expect(helmetSlot.gridCol).toBe(pos.col);
+    });
+
+    it('should have display names for all slots', () => {
+      const loadout = makeLoadout();
+      const slots = buildEquipmentSlots(loadout, {});
+      for (const slot of slots) {
+        expect(slot.slotName).not.toBe('');
+        expect(slot.slotName).not.toContain(':');
+      }
     });
   });
 });

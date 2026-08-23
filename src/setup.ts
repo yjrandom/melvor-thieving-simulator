@@ -1,4 +1,10 @@
-import { readAllMasteryLevels, readAreas, readLoadout, readTargets } from './state/reader';
+import {
+  readAllMasteryLevels,
+  readAreas,
+  readEquipmentOptions,
+  readLoadout,
+  readTargets,
+} from './state/reader';
 import MainModal from './templates/MainModal';
 
 export function setup(ctx: Modding.ModContext) {
@@ -15,6 +21,7 @@ export function setup(ctx: Modding.ModContext) {
 
     const targets = readTargets(game.thieving);
     const areas = readAreas(game.thieving);
+    const equipmentOptions = readEquipmentOptions(game);
 
     const component = ui.createStore(
       MainModal({
@@ -24,6 +31,7 @@ export function setup(ctx: Modding.ModContext) {
           loadout: readLoadout(game),
           masteryLevels: readAllMasteryLevels(game.thieving),
         }),
+        equipmentOptions,
       }),
     );
     ui.create(component, document.body);

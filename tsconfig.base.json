@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "rootDir": "./src",
+    
     // Environment Settings
     "module": "esnext",
     "moduleResolution": "bundler",

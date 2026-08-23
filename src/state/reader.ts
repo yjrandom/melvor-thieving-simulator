@@ -2,6 +2,7 @@ import type {
   AgilityObstacle,
   AgilityPillar,
   AstrologyConstellation,
+  EquipmentOption,
   EquippedItemEntry,
   LootItem,
   Modifier,
@@ -265,6 +266,39 @@ function readActiveSynergy(player: Player): SummoningSynergyInfo | undefined {
     description: synergy.description,
     modifiers: resolveModifiers(synergy.modifiers),
   };
+}
+
+/**
+ * Enumerates all equippable items for each thieving-relevant equipment slot.
+ *
+ * @returns Record keyed by slot ID, each holding the available items sorted alphabetically.
+ */
+export function readEquipmentOptions(
+  game: Game,
+): Record<string, EquipmentOption[]> {
+  const thievingSlotIds = new Set<string>(
+    Object.values(ThievingEquipmentSlotId),
+  );
+  const optionsBySlot: Record<string, EquipmentOption[]> = {};
+
+  for (const item of game.items.equipment.allObjects) {
+    for (const slot of item.validSlots) {
+      if (!thievingSlotIds.has(slot.id)) continue;
+      const slotId = slot.id;
+      if (!(slotId in optionsBySlot)) optionsBySlot[slotId] = [];
+      optionsBySlot[slotId]?.push({
+        itemId: item.id,
+        itemName: item.name,
+        modifiers: resolveModifiers(item.modifiers),
+      });
+    }
+  }
+
+  for (const options of Object.values(optionsBySlot)) {
+    options.sort((a, b) => a.itemName.localeCompare(b.itemName));
+  }
+
+  return optionsBySlot;
 }
 
 /**
