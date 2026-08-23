@@ -268,8 +268,16 @@ function readActiveSynergy(player: Player): SummoningSynergyInfo | undefined {
   };
 }
 
+const THIEVING_BOOST_IDS = new Set<string>(Object.values(ThievingBoostId));
+
+/** Returns true if the item has at least one modifier relevant to thieving calculations. */
+function hasThievingModifier(modifiers: ModifierValue[] | undefined): boolean {
+  if (!modifiers) return false;
+  return modifiers.some((mv) => THIEVING_BOOST_IDS.has(mv.modifier.id));
+}
+
 /**
- * Enumerates all equippable items for each thieving-relevant equipment slot.
+ * Enumerates equippable items with thieving-relevant modifiers for each equipment slot.
  *
  * @returns Record keyed by slot ID, each holding the available items sorted alphabetically.
  */
@@ -282,6 +290,7 @@ export function readEquipmentOptions(
   const optionsBySlot: Record<string, EquipmentOption[]> = {};
 
   for (const item of game.items.equipment.allObjects) {
+    if (!hasThievingModifier(item.modifiers)) continue;
     for (const slot of item.validSlots) {
       if (!thievingSlotIds.has(slot.id)) continue;
       const slotId = slot.id;
