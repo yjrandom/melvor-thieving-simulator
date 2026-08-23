@@ -80,6 +80,7 @@ function makeSynergy(
   return {
     summon1Id,
     summon2Id,
+    name: `${summon1Id} + ${summon2Id}`,
     description: 'test synergy',
     modifiers,
   };

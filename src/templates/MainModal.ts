@@ -4,6 +4,8 @@ import type {
   EquipmentOption,
   EquippedItemEntry,
   LoadoutOverrides,
+  Potion,
+  SummoningSynergyInfo,
   ThievingArea,
   ThievingLoadout,
   ThievingResult,
@@ -32,7 +34,7 @@ export enum SortDirection {
 
 export type RealmFilter = 'all' | 'melvor' | 'abyssal';
 
-export type ModalTab = 'simulate' | 'equipment';
+export type ModalTab = 'simulate' | 'equipment' | 'config';
 
 export interface ComparisonRow {
   target: ThievingTarget;
@@ -83,6 +85,27 @@ export interface ConfigDisplay {
   abyssalPool: string;
 }
 
+export interface AgilitySlotDisplay {
+  slot: number;
+  name: string;
+  type: 'obstacle' | 'pillar';
+  isCleared: boolean;
+}
+
+export interface PotionOptionDisplay {
+  itemId: string;
+  itemName: string;
+  tier: number;
+  isSelected: boolean;
+}
+
+export interface SynergyOptionDisplay {
+  index: number;
+  name: string;
+  description: string;
+  isSelected: boolean;
+}
+
 export interface ImportResult {
   loadout: ThievingLoadout;
   masteryLevels: Map<string, number>;
@@ -93,6 +116,8 @@ export interface MainModalInputProps {
   areas: ThievingArea[];
   onImport: () => ImportResult;
   equipmentOptions: Record<string, EquipmentOption[]>;
+  potionOptions: Potion[];
+  synergyOptions: SummoningSynergyInfo[];
 }
 
 interface MainModalScope {
@@ -109,6 +134,10 @@ interface MainModalScope {
   selectedSlot: string | null;
   slotOptions: EquipmentOption[];
   selectedSlotName: string;
+  potionDisplayOptions: PotionOptionDisplay[];
+  synergyDisplayOptions: SynergyOptionDisplay[];
+  agilitySlots: AgilitySlotDisplay[];
+  hasAnyOverride: boolean;
   setIsOpen: () => void;
   setActiveTab: (tab: ModalTab) => void;
   setRealmFilter: (filter: RealmFilter) => void;
@@ -120,6 +149,12 @@ interface MainModalScope {
   selectItem: (option: EquipmentOption | null) => void;
   clearSlot: () => void;
   resetEquipment: () => void;
+  selectPotion: (potion: PotionOptionDisplay) => void;
+  clearPotion: () => void;
+  selectSynergy: (synergy: SynergyOptionDisplay) => void;
+  clearSynergy: () => void;
+  clearAgilitySlot: (display: AgilitySlotDisplay) => void;
+  resetAll: () => void;
 }
 
 const SLOT_DISPLAY_NAMES: Readonly<Record<string, string>> = {
@@ -258,6 +293,78 @@ export function buildEquipmentSlots(
   });
 }
 
+/** Builds potion option display state with selection tracking. */
+export function buildPotionOptions(
+  options: Potion[],
+  activePotion: Potion | undefined,
+): PotionOptionDisplay[] {
+  return options.map((p) => ({
+    itemId: p.itemId,
+    itemName: p.itemName,
+    tier: p.tier,
+    isSelected: activePotion?.itemId === p.itemId,
+  }));
+}
+
+/** Builds synergy option display state with selection tracking. */
+export function buildSynergyOptions(
+  options: SummoningSynergyInfo[],
+  activeSynergy: SummoningSynergyInfo | undefined,
+): SynergyOptionDisplay[] {
+  return options.map((s, i) => ({
+    index: i,
+    name: s.name,
+    description: s.description,
+    isSelected:
+      activeSynergy?.summon1Id === s.summon1Id &&
+      activeSynergy?.summon2Id === s.summon2Id,
+  }));
+}
+
+/** Builds agility slot display from the active loadout and current overrides. */
+export function buildAgilitySlots(
+  loadout: ThievingLoadout,
+  overrides: LoadoutOverrides,
+): AgilitySlotDisplay[] {
+  const slots: AgilitySlotDisplay[] = [];
+  const clearedObstacles = new Set<number>();
+  const clearedPillars = new Set<number>();
+
+  if (overrides.agilityObstacles) {
+    for (const [slotStr, val] of Object.entries(overrides.agilityObstacles)) {
+      if (val === null) clearedObstacles.add(Number(slotStr));
+    }
+  }
+  if (overrides.agilityPillars) {
+    for (const [slotStr, val] of Object.entries(overrides.agilityPillars)) {
+      if (val === null) clearedPillars.add(Number(slotStr));
+    }
+  }
+
+  for (const obstacle of loadout.agilityObstacles) {
+    slots.push({
+      slot: obstacle.slot,
+      name: obstacle.name,
+      type: 'obstacle',
+      isCleared: clearedObstacles.has(obstacle.slot),
+    });
+  }
+  for (const pillar of loadout.agilityPillars) {
+    slots.push({
+      slot: pillar.slot,
+      name: pillar.name,
+      type: 'pillar',
+      isCleared: clearedPillars.has(pillar.slot),
+    });
+  }
+  return slots;
+}
+
+/** Returns true if any override field is set (not undefined). */
+function hasOverrides(overrides: LoadoutOverrides): boolean {
+  return Object.values(overrides).some((v) => v !== undefined);
+}
+
 const SORT_COLUMN_ACCESSOR: Record<
   SortColumn,
   (row: ComparisonRow) => string | number
@@ -336,6 +443,29 @@ export default function MainModal(
     return applyOverrides(importedLoadout!, currentOverrides);
   }
 
+  /** Refreshes all derived display state from the current loadout and overrides. */
+  function refreshDisplay(scope: MainModalScope): void {
+    const activeLoadout = getActiveLoadout();
+    scope.configDisplay = buildConfigDisplay(activeLoadout);
+    scope.allRows = buildRows(
+      props.targets,
+      activeLoadout,
+      importedMasteryLevels!,
+    );
+    scope.equipmentSlots = buildEquipmentSlots(activeLoadout, currentOverrides);
+    scope.potionDisplayOptions = buildPotionOptions(
+      props.potionOptions,
+      activeLoadout.activePotion,
+    );
+    scope.synergyDisplayOptions = buildSynergyOptions(
+      props.synergyOptions,
+      activeLoadout.activeSummoningSynergy,
+    );
+    scope.agilitySlots = buildAgilitySlots(importedLoadout!, currentOverrides);
+    scope.hasAnyOverride = hasOverrides(currentOverrides);
+    scope.recomputeFilteredRows();
+  }
+
   return {
     $template: '#ts-modal',
     isOpen: false,
@@ -351,6 +481,10 @@ export default function MainModal(
     selectedSlot: null,
     slotOptions: [],
     selectedSlotName: '',
+    potionDisplayOptions: [],
+    synergyDisplayOptions: [],
+    agilitySlots: [],
+    hasAnyOverride: false,
 
     setIsOpen() {
       this.isOpen = !this.isOpen;
@@ -390,14 +524,10 @@ export default function MainModal(
       importedLoadout = loadout;
       importedMasteryLevels = masteryLevels;
       currentOverrides = {};
-      const activeLoadout = getActiveLoadout();
-      this.configDisplay = buildConfigDisplay(activeLoadout);
-      this.allRows = buildRows(props.targets, activeLoadout, masteryLevels);
-      this.equipmentSlots = buildEquipmentSlots(activeLoadout, currentOverrides);
       this.hasImported = true;
       this.selectedSlot = null;
       this.slotOptions = [];
-      this.recomputeFilteredRows();
+      refreshDisplay(this);
     },
 
     recomputeFilteredRows() {
@@ -443,18 +573,7 @@ export default function MainModal(
         currentOverrides.equipment[slotId] = null;
       }
 
-      const activeLoadout = getActiveLoadout();
-      this.configDisplay = buildConfigDisplay(activeLoadout);
-      this.allRows = buildRows(
-        props.targets,
-        activeLoadout,
-        importedMasteryLevels,
-      );
-      this.equipmentSlots = buildEquipmentSlots(
-        activeLoadout,
-        currentOverrides,
-      );
-      this.recomputeFilteredRows();
+      refreshDisplay(this);
     },
 
     clearSlot() {
@@ -463,22 +582,74 @@ export default function MainModal(
 
     resetEquipment() {
       if (!importedLoadout || !importedMasteryLevels) return;
-      currentOverrides = { ...currentOverrides, equipment: null };
-
-      const activeLoadout = getActiveLoadout();
-      this.configDisplay = buildConfigDisplay(activeLoadout);
-      this.allRows = buildRows(
-        props.targets,
-        activeLoadout,
-        importedMasteryLevels,
-      );
-      this.equipmentSlots = buildEquipmentSlots(
-        activeLoadout,
-        currentOverrides,
-      );
+      delete currentOverrides.equipment;
       this.selectedSlot = null;
       this.slotOptions = [];
-      this.recomputeFilteredRows();
+      refreshDisplay(this);
+    },
+
+    selectPotion(display: PotionOptionDisplay) {
+      if (!importedLoadout || !importedMasteryLevels) return;
+      const potion = props.potionOptions.find(
+        (p) => p.itemId === display.itemId,
+      );
+      if (!potion) return;
+
+      if (display.isSelected) {
+        delete currentOverrides.activePotion;
+      } else {
+        currentOverrides.activePotion = potion;
+      }
+      refreshDisplay(this);
+    },
+
+    clearPotion() {
+      if (!importedLoadout || !importedMasteryLevels) return;
+      currentOverrides.activePotion = null;
+      refreshDisplay(this);
+    },
+
+    selectSynergy(display: SynergyOptionDisplay) {
+      if (!importedLoadout || !importedMasteryLevels) return;
+      const synergy = props.synergyOptions[display.index];
+      if (!synergy) return;
+
+      if (display.isSelected) {
+        delete currentOverrides.activeSummoningSynergy;
+      } else {
+        currentOverrides.activeSummoningSynergy = synergy;
+      }
+      refreshDisplay(this);
+    },
+
+    clearSynergy() {
+      if (!importedLoadout || !importedMasteryLevels) return;
+      currentOverrides.activeSummoningSynergy = null;
+      refreshDisplay(this);
+    },
+
+    clearAgilitySlot(display: AgilitySlotDisplay) {
+      if (!importedLoadout || !importedMasteryLevels) return;
+      if (display.type === 'obstacle') {
+        if (!currentOverrides.agilityObstacles) {
+          currentOverrides.agilityObstacles = {};
+        }
+        currentOverrides.agilityObstacles[display.slot] = null;
+      } else {
+        if (!currentOverrides.agilityPillars) {
+          currentOverrides.agilityPillars = {};
+        }
+        currentOverrides.agilityPillars[display.slot] = null;
+      }
+      refreshDisplay(this);
+    },
+
+    resetAll() {
+      if (!importedLoadout || !importedMasteryLevels) return;
+      currentOverrides = {};
+      this.selectedSlot = null;
+      this.slotOptions = [];
+      refreshDisplay(this);
     },
   };
 }

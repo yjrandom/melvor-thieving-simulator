@@ -125,7 +125,7 @@ Three layers, all in `src/`:
 | Define UI wireframes               | **Done**    | Columns defined: NPC, Area, Level, XP/hr, GP/hr, Success %, Double %. Realm tabs for filtering.                                    |
 | Build state reader                 | **Done**    | `readLoadout`, `readTargets`, `readAreas`, `readAllMasteryLevels` in `state/reader.ts`.                                            |
 | Build calculation engine           | **Done**    | Pure functions in `calc/thieving.ts` and `calc/aggregator.ts`. Fully tested.                                                        |
-| Build UI                           | **Partial** | Comparison table (4.1) done. Config panel (4.2) and per-target detail (4.3) remaining.                                              |
+| Build UI                           | **Partial** | Comparison table (4.1) and config panel (4.2) done. Per-target detail (4.3) remaining.                                              |
 | Set up dev/test loop               | Gap         | Establish a way to load the mod into the game with a save file that has varied mastery levels for realistic testing.                |
 | Create `assets/style.css`          | **Done**    | Styled comparison table with dark theme matching Melvor aesthetic. Loaded via manifest.                                             |
 

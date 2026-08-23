@@ -263,6 +263,7 @@ function readActiveSynergy(player: Player): SummoningSynergyInfo | undefined {
   return {
     summon1Id: synergy.summons[0].product.id,
     summon2Id: synergy.summons[1].product.id,
+    name: synergy.name,
     description: synergy.description,
     modifiers: resolveModifiers(synergy.modifiers),
   };
@@ -308,6 +309,45 @@ export function readEquipmentOptions(
   }
 
   return optionsBySlot;
+}
+
+/**
+ * Enumerates all potions associated with the thieving skill, sorted by name.
+ *
+ * @returns All thieving potion items with resolved modifiers.
+ */
+export function readPotionOptions(game: Game): Potion[] {
+  return game.items.potions.allObjects
+    .filter((p) => p.action === (game.thieving as unknown as Action))
+    .map((p) => ({
+      itemId: p.id,
+      itemName: p.name,
+      tier: p.tier,
+      modifiers: resolveModifiers(p.stats.modifiers),
+    }))
+    .sort((a, b) => a.itemName.localeCompare(b.itemName));
+}
+
+/**
+ * Enumerates all summoning synergies where at least one familiar is associated with thieving.
+ *
+ * @returns All thieving-relevant synergies with resolved modifiers.
+ */
+export function readSynergyOptions(game: Game): SummoningSynergyInfo[] {
+  const thieving = game.thieving as unknown as AnySkill;
+  return game.summoning.synergies
+    .filter(
+      (syn) =>
+        syn.summons[0].skills.includes(thieving) ||
+        syn.summons[1].skills.includes(thieving),
+    )
+    .map((syn) => ({
+      summon1Id: syn.summons[0].product.id,
+      summon2Id: syn.summons[1].product.id,
+      name: syn.name,
+      description: syn.description,
+      modifiers: resolveModifiers(syn.modifiers),
+    }));
 }
 
 /**

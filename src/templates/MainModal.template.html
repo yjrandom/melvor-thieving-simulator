@@ -28,6 +28,12 @@
             </svg>
             Equip
           </button>
+          <button class="ts-sidebar-tab" :class="{ 'ts-sidebar-tab--active': activeTab === 'config' }" @click="setActiveTab('config')">
+            <svg class="ts-sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
+              <path d="M10 2a1.5 1.5 0 011.5 1.5v1.07a5.97 5.97 0 011.82 1.06l.93-.54a1.5 1.5 0 012.06.55l.5.87a1.5 1.5 0 01-.55 2.05l-.93.54a6.02 6.02 0 010 2.1l.93.54a1.5 1.5 0 01.55 2.05l-.5.87a1.5 1.5 0 01-2.06.55l-.93-.54a5.97 5.97 0 01-1.82 1.06v1.07A1.5 1.5 0 0110 18a1.5 1.5 0 01-1.5-1.5v-1.07a5.97 5.97 0 01-1.82-1.06l-.93.54a1.5 1.5 0 01-2.06-.55l-.5-.87a1.5 1.5 0 01.55-2.05l.93-.54a6.02 6.02 0 010-2.1l-.93-.54a1.5 1.5 0 01-.55-2.05l.5-.87a1.5 1.5 0 012.06-.55l.93.54A5.97 5.97 0 018.5 4.57V3.5A1.5 1.5 0 0110 2zm0 5.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5z"/>
+            </svg>
+            Config
+          </button>
         </div>
         <div class="ts-modal-body">
           <div v-if="activeTab === 'simulate'">
@@ -171,7 +177,81 @@
               </div>
             </div>
             <div class="ts-equip-actions">
-              <button class="ts-btn ts-btn--secondary" @click="resetEquipment">Reset All</button>
+              <button class="ts-btn ts-btn--secondary" @click="resetEquipment">Reset Equipment</button>
+            </div>
+          </div>
+          <div class="ts-config-tab-wrap" v-if="activeTab === 'config'">
+            <div class="ts-config-tab-scroll">
+              <!-- Potion selector -->
+              <div class="ts-config-panel">
+                <div class="ts-config-panel-header">
+                  <span class="ts-config-panel-title">Potion</span>
+                  <button class="ts-config-panel-clear" @click="clearPotion">Clear</button>
+                </div>
+                <div class="ts-config-panel-body">
+                  <div class="ts-config-panel-empty" v-if="!potionDisplayOptions.length">No thieving potions found.</div>
+                  <button
+                    v-for="potion in potionDisplayOptions"
+                    class="ts-config-option"
+                    :class="{ 'ts-config-option--selected': potion.isSelected }"
+                    @click="selectPotion(potion)"
+                    v-text="potion.itemName"
+                  ></button>
+                </div>
+              </div>
+
+              <!-- Summoning synergy selector -->
+              <div class="ts-config-panel">
+                <div class="ts-config-panel-header">
+                  <span class="ts-config-panel-title">Summoning Synergy</span>
+                  <button class="ts-config-panel-clear" @click="clearSynergy">Clear</button>
+                </div>
+                <div class="ts-config-panel-body">
+                  <div class="ts-config-panel-empty" v-if="!synergyDisplayOptions.length">No thieving synergies found.</div>
+                  <button
+                    v-for="syn in synergyDisplayOptions"
+                    class="ts-config-option"
+                    :class="{ 'ts-config-option--selected': syn.isSelected }"
+                    @click="selectSynergy(syn)"
+                  >
+                    <span class="ts-config-option-name" v-text="syn.name"></span>
+                    <span class="ts-config-option-desc" v-text="syn.description"></span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Agility course display -->
+              <div class="ts-config-panel">
+                <div class="ts-config-panel-header">
+                  <span class="ts-config-panel-title">Agility Course</span>
+                </div>
+                <div class="ts-config-panel-body">
+                  <div class="ts-config-panel-empty" v-if="!agilitySlots.length">No course loaded.</div>
+                  <div
+                    v-for="slot in agilitySlots"
+                    class="ts-agility-slot"
+                    :class="{ 'ts-agility-slot--cleared': slot.isCleared }"
+                  >
+                    <span class="ts-agility-slot-type" v-text="slot.type === 'obstacle' ? 'Slot ' + slot.slot : 'Pillar'"></span>
+                    <span class="ts-agility-slot-name" v-text="slot.name"></span>
+                    <button
+                      class="ts-agility-slot-clear"
+                      @click="clearAgilitySlot(slot)"
+                      v-if="!slot.isCleared"
+                    >&times;</button>
+                    <span class="ts-agility-slot-badge" v-if="slot.isCleared">Cleared</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reset all overrides -->
+            <div class="ts-equip-actions">
+              <button
+                class="ts-btn ts-btn--primary"
+                @click="resetAll"
+                v-if="hasAnyOverride"
+              >Reset All to Imported</button>
             </div>
           </div>
         </div>

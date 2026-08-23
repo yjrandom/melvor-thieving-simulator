@@ -3,6 +3,8 @@ import {
   readAreas,
   readEquipmentOptions,
   readLoadout,
+  readPotionOptions,
+  readSynergyOptions,
   readTargets,
 } from './state/reader';
 import MainModal from './templates/MainModal';
@@ -13,15 +15,17 @@ export function setup(ctx: Modding.ModContext) {
   });
 
   ctx.onCharacterLoaded(() => {
-    console.log(`[ThievingSim] Character loaded`);
+    console.debug(`[ThievingSim] Character loaded`);
   });
 
   ctx.onInterfaceReady(() => {
-    console.log('[ThievingSim] Interface ready');
+    console.debug('[ThievingSim] Interface ready');
 
     const targets = readTargets(game.thieving);
     const areas = readAreas(game.thieving);
     const equipmentOptions = readEquipmentOptions(game);
+    const potionOptions = readPotionOptions(game);
+    const synergyOptions = readSynergyOptions(game);
 
     const component = ui.createStore(
       MainModal({
@@ -32,6 +36,8 @@ export function setup(ctx: Modding.ModContext) {
           masteryLevels: readAllMasteryLevels(game.thieving),
         }),
         equipmentOptions,
+        potionOptions,
+        synergyOptions,
       }),
     );
     ui.create(component, document.body);

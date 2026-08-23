@@ -81,6 +81,7 @@ function makeSynergy(id1: string, id2: string): SummoningSynergyInfo {
   return {
     summon1Id: id1,
     summon2Id: id2,
+    name: `${id1} + ${id2}`,
     description: `${id1} + ${id2}`,
     modifiers: [],
   };

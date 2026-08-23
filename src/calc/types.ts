@@ -106,6 +106,8 @@ export interface ShopPurchase {
 export interface SummoningSynergyInfo {
   summon1Id: string;
   summon2Id: string;
+  /** Human-readable synergy name (e.g. "Leprechaun + Monkey"). */
+  name: string;
   description: string;
   modifiers: Modifier[];
 }

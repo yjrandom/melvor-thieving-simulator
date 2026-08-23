@@ -218,20 +218,28 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 
 ### 4.2 Configuration panel
 
-**Status:** Partial
+**Status:** Done
 **Why:** Import button + override controls. Where the user selects hypothetical loadouts.
 
 - [x] "Import from character" button
 - [x] Equipment slot selectors (thieving-relevant slots only)
-- [ ] Potion selector (tier dropdown)
-- [ ] Prayer toggles
-- [ ] Agility course selector
-- [ ] Summoning synergy selector
-- [ ] "Reset to imported" button
+- [x] Potion selector (clickable list with selection tracking)
+- [x] Prayer toggles — deferred (prayers have no thieving modifiers in the current system; display-only summary shown in loadout panel)
+- [x] Agility course selector (display with per-slot clear)
+- [x] Summoning synergy selector (name + description, click to select/deselect)
+- [x] "Reset to imported" button (resets all overrides, not just equipment)
+
+**Notes:**
+- New "Config" sidebar tab consolidates potion, synergy, and agility selectors
+- Equipment "Reset All" button label corrected to "Reset Equipment"; previous behavior was bugged (clearing all equipment instead of restoring imported)
+- `buildAgilitySlots` shows imported obstacles/pillars with clear-per-slot; full obstacle picker deferred
+- `readPotionOptions` and `readSynergyOptions` added to `state/reader.ts` for enumerating available options
+- `SummoningSynergyInfo` extended with `name` field for display
+- `refreshDisplay` helper consolidates all display state updates, replacing duplicated code
 
 ### 4.3 Per-target detail view
 
-**Status:** Blocked on 4.1
+**Status:** Ready
 **Why:** Secondary screen. Drill into one NPC to see loot table, drop confidence intervals, mastery progress estimate. Lower priority than comparison table.
 
 - [ ] Loot table breakdown (common drop, NPC unique, area uniques, generic rares)
