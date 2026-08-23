@@ -1,3 +1,4 @@
+import type { LootCategory, RealmName } from '../constants/game.constants';
 import type { ThievingBoostId, ThievingRealmId } from '../constants/item-ids';
 
 export interface NumberRange {
@@ -27,11 +28,6 @@ export interface ThievingTarget extends NpcCalcFields {
   currencyRange: NumberRange;
   currencyType: 'gp' | 'ap';
   uniqueDrop?: LootItem;
-}
-
-export enum RealmName {
-  MELVOR = 'melvor',
-  ABYSSAL = 'abyssal',
 }
 
 export interface ThievingArea {
@@ -227,4 +223,17 @@ export interface ThievingResult {
   successfulActionsPerHour: number;
   xpPerHour: number;
   currencyPerHour: number;
+}
+
+export interface DetailLootEntry {
+  name: string;
+  category: LootCategory;
+  /** Chance of receiving this drop per successful action (0–1). */
+  chancePerSuccess: number;
+  /** Chance of receiving this drop per action accounting for success rate (0–1). */
+  chancePerAction: number;
+  /** Base drop quantity range. */
+  quantity: NumberRange;
+  /** Expected quantity per hour (factoring in success rate, doubling, and multipliers). */
+  expectedPerHour: number;
 }

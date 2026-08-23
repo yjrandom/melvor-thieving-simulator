@@ -1,6 +1,4 @@
 import type {
-  AgilityObstacle,
-  AgilityPillar,
   EquippedItemEntry,
   LoadoutOverrides,
   ThievingLoadout,
@@ -22,41 +20,51 @@ export function applyOverrides(
   overrides: LoadoutOverrides,
 ): ThievingLoadout {
   return {
-    equipment: overrides.equipment !== undefined
-      ? mergeEquipment(imported.equipment, overrides.equipment)
-      : imported.equipment,
+    equipment:
+      overrides.equipment !== undefined
+        ? mergeEquipment(imported.equipment, overrides.equipment)
+        : imported.equipment,
 
     masteryLevel: overrides.masteryLevel ?? imported.masteryLevel,
 
     melvorMasteryPoolPercent: imported.melvorMasteryPoolPercent,
     abyssalMasteryPoolPercent: imported.abyssalMasteryPoolPercent,
 
-    activePotion: overrides.activePotion !== undefined
-      ? (overrides.activePotion ?? undefined)
-      : imported.activePotion,
+    activePotion:
+      overrides.activePotion !== undefined
+        ? (overrides.activePotion ?? undefined)
+        : imported.activePotion,
 
-    activePrayers: overrides.activePrayers !== undefined
-      ? (overrides.activePrayers ?? undefined)
-      : imported.activePrayers,
+    activePrayers:
+      overrides.activePrayers !== undefined
+        ? (overrides.activePrayers ?? undefined)
+        : imported.activePrayers,
 
-    agilityObstacles: overrides.agilityObstacles !== undefined
-      ? mergeSlottedArray(imported.agilityObstacles, overrides.agilityObstacles)
-      : imported.agilityObstacles,
+    agilityObstacles:
+      overrides.agilityObstacles !== undefined
+        ? mergeSlottedArray(
+            imported.agilityObstacles,
+            overrides.agilityObstacles,
+          )
+        : imported.agilityObstacles,
 
-    agilityPillars: overrides.agilityPillars !== undefined
-      ? mergeSlottedArray(imported.agilityPillars, overrides.agilityPillars)
-      : imported.agilityPillars,
+    agilityPillars:
+      overrides.agilityPillars !== undefined
+        ? mergeSlottedArray(imported.agilityPillars, overrides.agilityPillars)
+        : imported.agilityPillars,
 
     astrologyConstellations: imported.astrologyConstellations,
     activePets: imported.activePets,
     shopPurchases: imported.shopPurchases,
 
-    activeSummoningSynergy: overrides.activeSummoningSynergy !== undefined
-      ? (overrides.activeSummoningSynergy ?? undefined)
-      : imported.activeSummoningSynergy,
+    activeSummoningSynergy:
+      overrides.activeSummoningSynergy !== undefined
+        ? (overrides.activeSummoningSynergy ?? undefined)
+        : imported.activeSummoningSynergy,
 
     skillLevel: overrides.skillLevel ?? imported.skillLevel,
-    abyssalSkillLevel: overrides.abyssalSkillLevel ?? imported.abyssalSkillLevel,
+    abyssalSkillLevel:
+      overrides.abyssalSkillLevel ?? imported.abyssalSkillLevel,
   };
 }
 
@@ -73,7 +81,7 @@ function mergeEquipment(
   const bySlot = new Map(imported.map((e) => [e.slotId, e]));
 
   if (overrides === null) {
-    return []
+    return [];
   }
 
   for (const [slotId, entry] of Object.entries(overrides)) {

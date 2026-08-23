@@ -239,13 +239,22 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 
 ### 4.3 Per-target detail view
 
-**Status:** Ready
+**Status:** Done
 **Why:** Secondary screen. Drill into one NPC to see loot table, drop confidence intervals, mastery progress estimate. Lower priority than comparison table.
 
-- [ ] Loot table breakdown (common drop, NPC unique, area uniques, generic rares)
-- [ ] Drop chance display with doubling factored in
-- [ ] Confidence interval calculator (probability of getting N drops in M attempts)
-- [ ] Mastery progress estimate (XP to next mastery level at current rate)
+- [x] Loot table breakdown (common drop, NPC unique, area uniques, generic rares)
+- [x] Drop chance display with doubling factored in
+- [x] Confidence interval calculator (probability of getting N drops in M attempts)
+- [ ] Mastery progress estimate (XP to next mastery level at current rate) — deferred: mastery XP per-action formula not documented in specs
+
+**Notes:**
+- Clicking a row in the comparison table opens the per-NPC detail view within the Sim tab
+- Stats grid shows: success rate, XP/hr, currency/hr, double chance, interval, stun duration, actions/hr, XP/action
+- Loot table shows all drop types with per-success chance, quantity range, and expected per hour (factoring in doubling)
+- Confidence calculator: binomial probability of at least 1 drop in N actions, with preset buttons (100/500/1K/5K/10K/50K)
+- Also shows attempts needed for 50%/90%/99% confidence per drop
+- Detail view auto-refreshes when loadout overrides change
+- `calc/detail.ts` exports `calcAtLeastOneChance`, `calcAttemptsForChance`, `buildLootTable` — all pure functions with full unit test coverage
 
 ---
 

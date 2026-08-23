@@ -22,3 +22,16 @@ export const DEFAULT_BOOSTS: ThievingBoosts = {
   itemMultiplierBonus: 0,
   autoSellMultiplier: 0,
 };
+
+export enum LootCategory {
+  CURRENCY = 'currency',
+  COMMON = 'common',
+  NPC_UNIQUE = 'npcUnique',
+  AREA_UNIQUE = 'areaUnique',
+  GENERIC_RARE = 'genericRare',
+}
+
+export enum RealmName {
+  MELVOR = 'melvor',
+  ABYSSAL = 'abyssal',
+}

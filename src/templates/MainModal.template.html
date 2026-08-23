@@ -37,102 +37,236 @@
         </div>
         <div class="ts-modal-body">
           <div v-if="activeTab === 'simulate'">
-            <div class="ts-config" v-if="!hasImported">
-              <div class="ts-config-empty">
-                <p>Import your character's loadout to begin simulation.</p>
-                <button class="ts-btn ts-btn--primary" @click="importLoadout">Import Character</button>
+            <!-- Comparison table view -->
+            <div v-if="!detailDisplay">
+              <div class="ts-config" v-if="!hasImported">
+                <div class="ts-config-empty">
+                  <p>Import your character's loadout to begin simulation.</p>
+                  <button class="ts-btn ts-btn--primary" @click="importLoadout">Import Character</button>
+                </div>
               </div>
-            </div>
-            <div class="ts-config" v-if="hasImported">
-              <div class="ts-config-bar">
-                <span class="ts-config-heading">Loadout</span>
-                <button class="ts-btn ts-btn--secondary" @click="importLoadout">Re-import</button>
-              </div>
-              <div class="ts-config-grid">
-                <div class="ts-config-section ts-config-section--wide">
-                  <div class="ts-config-label">Equipment</div>
-                  <div class="ts-equip-grid" v-if="configDisplay.equipment.length">
-                    <div class="ts-equip-entry" v-for="entry in configDisplay.equipment">
-                      <span class="ts-equip-slot" v-text="entry.slotName + ':'"></span>
-                      <span class="ts-equip-item" v-text="entry.itemName"></span>
+              <div class="ts-config" v-if="hasImported">
+                <div class="ts-config-bar">
+                  <span class="ts-config-heading">Loadout</span>
+                  <button class="ts-btn ts-btn--secondary" @click="importLoadout">Re-import</button>
+                </div>
+                <div class="ts-config-grid">
+                  <div class="ts-config-section ts-config-section--wide">
+                    <div class="ts-config-label">Equipment</div>
+                    <div class="ts-equip-grid" v-if="configDisplay.equipment.length">
+                      <div class="ts-equip-entry" v-for="entry in configDisplay.equipment">
+                        <span class="ts-equip-slot" v-text="entry.slotName + ':'"></span>
+                        <span class="ts-equip-item" v-text="entry.itemName"></span>
+                      </div>
+                    </div>
+                    <div class="ts-config-none" v-else>None</div>
+                  </div>
+                  <div class="ts-config-section">
+                    <div class="ts-config-label">Potion</div>
+                    <div :class="configDisplay.potion === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.potion"></div>
+                  </div>
+                  <div class="ts-config-section">
+                    <div class="ts-config-label">Prayers</div>
+                    <div :class="configDisplay.prayerSummary === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.prayerSummary"></div>
+                  </div>
+                  <div class="ts-config-section">
+                    <div class="ts-config-label">Synergy</div>
+                    <div :class="configDisplay.synergy === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.synergy"></div>
+                  </div>
+                  <div class="ts-config-section">
+                    <div class="ts-config-label">Agility</div>
+                    <div :class="configDisplay.agilitySummary === 'No course loaded' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.agilitySummary"></div>
+                  </div>
+                  <div class="ts-config-section ts-config-section--wide">
+                    <div class="ts-config-label">Character</div>
+                    <div class="ts-config-stats">
+                      <span>Level <span v-text="configDisplay.skillLevel"></span></span>
+                      <span class="ts-config-sep">&middot;</span>
+                      <span>Abyssal <span v-text="configDisplay.abyssalSkillLevel"></span></span>
+                      <span class="ts-config-sep">&middot;</span>
+                      <span>Pool <span v-text="configDisplay.melvorPool"></span></span>
+                      <span class="ts-config-sep">&middot;</span>
+                      <span>Abyssal <span v-text="configDisplay.abyssalPool"></span></span>
                     </div>
                   </div>
-                  <div class="ts-config-none" v-else>None</div>
-                </div>
-                <div class="ts-config-section">
-                  <div class="ts-config-label">Potion</div>
-                  <div :class="configDisplay.potion === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.potion"></div>
-                </div>
-                <div class="ts-config-section">
-                  <div class="ts-config-label">Prayers</div>
-                  <div :class="configDisplay.prayerSummary === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.prayerSummary"></div>
-                </div>
-                <div class="ts-config-section">
-                  <div class="ts-config-label">Synergy</div>
-                  <div :class="configDisplay.synergy === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.synergy"></div>
-                </div>
-                <div class="ts-config-section">
-                  <div class="ts-config-label">Agility</div>
-                  <div :class="configDisplay.agilitySummary === 'No course loaded' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.agilitySummary"></div>
-                </div>
-                <div class="ts-config-section ts-config-section--wide">
-                  <div class="ts-config-label">Character</div>
-                  <div class="ts-config-stats">
-                    <span>Level <span v-text="configDisplay.skillLevel"></span></span>
-                    <span class="ts-config-sep">&middot;</span>
-                    <span>Abyssal <span v-text="configDisplay.abyssalSkillLevel"></span></span>
-                    <span class="ts-config-sep">&middot;</span>
-                    <span>Pool <span v-text="configDisplay.melvorPool"></span></span>
-                    <span class="ts-config-sep">&middot;</span>
-                    <span>Abyssal <span v-text="configDisplay.abyssalPool"></span></span>
-                  </div>
-                </div>
-                <div class="ts-config-section ts-config-section--wide">
-                  <div class="ts-config-label">Other Sources</div>
-                  <div class="ts-config-stats">
-                    <span v-text="configDisplay.astrologyCount + ' astrology'"></span>
-                    <span class="ts-config-sep">&middot;</span>
-                    <span v-text="configDisplay.petCount + ' pets'"></span>
-                    <span class="ts-config-sep">&middot;</span>
-                    <span v-text="configDisplay.shopPurchaseCount + ' purchases'"></span>
+                  <div class="ts-config-section ts-config-section--wide">
+                    <div class="ts-config-label">Other Sources</div>
+                    <div class="ts-config-stats">
+                      <span v-text="configDisplay.astrologyCount + ' astrology'"></span>
+                      <span class="ts-config-sep">&middot;</span>
+                      <span v-text="configDisplay.petCount + ' pets'"></span>
+                      <span class="ts-config-sep">&middot;</span>
+                      <span v-text="configDisplay.shopPurchaseCount + ' purchases'"></span>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div class="ts-table-wrap" v-if="hasImported">
+                <table class="ts-table">
+                  <thead>
+                    <tr>
+                      <th class="ts-th ts-th--text" @click="toggleSort('npc')">NPC<span class="ts-sort-indicator" v-text="sortIndicator('npc')"></span></th>
+                      <th class="ts-th ts-th--text" @click="toggleSort('area')">Area<span class="ts-sort-indicator" v-text="sortIndicator('area')"></span></th>
+                      <th class="ts-th ts-th--num" @click="toggleSort('level')">Lvl<span class="ts-sort-indicator" v-text="sortIndicator('level')"></span></th>
+                      <th class="ts-th ts-th--num" @click="toggleSort('xpHr')">XP/hr<span class="ts-sort-indicator" v-text="sortIndicator('xpHr')"></span></th>
+                      <th class="ts-th ts-th--num" @click="toggleSort('currencyHr')">GP/hr<span class="ts-sort-indicator" v-text="sortIndicator('currencyHr')"></span></th>
+                      <th class="ts-th ts-th--num" @click="toggleSort('success')">Success<span class="ts-sort-indicator" v-text="sortIndicator('success')"></span></th>
+                      <th class="ts-th ts-th--num" @click="toggleSort('double')">Double<span class="ts-sort-indicator" v-text="sortIndicator('double')"></span></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="row in filteredRows" class="ts-row ts-row--clickable" @click="selectTarget(row)">
+                      <td class="ts-td ts-td--npc">
+                        <span class="ts-npc-name" v-text="row.target.name"></span>
+                        <span class="ts-mastery-badge" v-text="row.masteryLevel"></span>
+                      </td>
+                      <td class="ts-td ts-td--text" v-text="row.target.area"></td>
+                      <td class="ts-td ts-td--num" v-text="row.target.level"></td>
+                      <td class="ts-td ts-td--num" v-text="row.formattedXpHr"></td>
+                      <td class="ts-td ts-td--num">
+                        <span v-text="row.formattedCurrencyHr"></span>
+                        <span class="ts-currency-label" v-text="row.currencyLabel"></span>
+                      </td>
+                      <td class="ts-td ts-td--num" v-text="row.formattedSuccess"></td>
+                      <td class="ts-td ts-td--num" v-text="row.formattedDouble"></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="ts-footer" v-if="hasImported">
+                <span class="ts-count" v-text="filteredRows.length + ' NPCs'"></span>
+              </div>
             </div>
-            <div class="ts-table-wrap" v-if="hasImported">
-              <table class="ts-table">
-                <thead>
-                  <tr>
-                    <th class="ts-th ts-th--text" @click="toggleSort('npc')">NPC<span class="ts-sort-indicator" v-text="sortIndicator('npc')"></span></th>
-                    <th class="ts-th ts-th--text" @click="toggleSort('area')">Area<span class="ts-sort-indicator" v-text="sortIndicator('area')"></span></th>
-                    <th class="ts-th ts-th--num" @click="toggleSort('level')">Lvl<span class="ts-sort-indicator" v-text="sortIndicator('level')"></span></th>
-                    <th class="ts-th ts-th--num" @click="toggleSort('xpHr')">XP/hr<span class="ts-sort-indicator" v-text="sortIndicator('xpHr')"></span></th>
-                    <th class="ts-th ts-th--num" @click="toggleSort('currencyHr')">GP/hr<span class="ts-sort-indicator" v-text="sortIndicator('currencyHr')"></span></th>
-                    <th class="ts-th ts-th--num" @click="toggleSort('success')">Success<span class="ts-sort-indicator" v-text="sortIndicator('success')"></span></th>
-                    <th class="ts-th ts-th--num" @click="toggleSort('double')">Double<span class="ts-sort-indicator" v-text="sortIndicator('double')"></span></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr v-for="row in filteredRows" class="ts-row">
-                    <td class="ts-td ts-td--npc">
-                      <span class="ts-npc-name" v-text="row.target.name"></span>
-                      <span class="ts-mastery-badge" v-text="row.masteryLevel"></span>
-                    </td>
-                    <td class="ts-td ts-td--text" v-text="row.target.area"></td>
-                    <td class="ts-td ts-td--num" v-text="row.target.level"></td>
-                    <td class="ts-td ts-td--num" v-text="row.formattedXpHr"></td>
-                    <td class="ts-td ts-td--num">
-                      <span v-text="row.formattedCurrencyHr"></span>
-                      <span class="ts-currency-label" v-text="row.currencyLabel"></span>
-                    </td>
-                    <td class="ts-td ts-td--num" v-text="row.formattedSuccess"></td>
-                    <td class="ts-td ts-td--num" v-text="row.formattedDouble"></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="ts-footer" v-if="hasImported">
-              <span class="ts-count" v-text="filteredRows.length + ' NPCs'"></span>
+
+            <!-- Per-target detail view -->
+            <div v-if="detailDisplay" class="ts-detail">
+              <div class="ts-detail-header">
+                <button class="ts-detail-back" @click="backToTable">&larr; Back</button>
+                <div class="ts-detail-title">
+                  <span class="ts-detail-name" v-text="detailDisplay.name"></span>
+                  <span class="ts-mastery-badge" v-text="detailDisplay.masteryLevel"></span>
+                </div>
+                <div class="ts-detail-subtitle">
+                  <span v-text="detailDisplay.area"></span>
+                  <span class="ts-config-sep">&middot;</span>
+                  <span v-text="'Level ' + detailDisplay.level"></span>
+                  <span class="ts-config-sep">&middot;</span>
+                  <span v-text="detailDisplay.realm"></span>
+                </div>
+              </div>
+
+              <div class="ts-detail-stats">
+                <div class="ts-detail-stat">
+                  <span class="ts-detail-stat-label">Success Rate</span>
+                  <span class="ts-detail-stat-value" v-text="detailDisplay.formattedSuccessRate"></span>
+                </div>
+                <div class="ts-detail-stat">
+                  <span class="ts-detail-stat-label">XP/hr</span>
+                  <span class="ts-detail-stat-value" v-text="detailDisplay.formattedXpHr"></span>
+                </div>
+                <div class="ts-detail-stat">
+                  <span class="ts-detail-stat-label" v-text="detailDisplay.currencyLabel + '/hr'"></span>
+                  <span class="ts-detail-stat-value" v-text="detailDisplay.formattedCurrencyHr"></span>
+                </div>
+                <div class="ts-detail-stat">
+                  <span class="ts-detail-stat-label">Double</span>
+                  <span class="ts-detail-stat-value" v-text="detailDisplay.formattedDouble"></span>
+                </div>
+                <div class="ts-detail-stat">
+                  <span class="ts-detail-stat-label">Interval</span>
+                  <span class="ts-detail-stat-value" v-text="detailDisplay.formattedInterval"></span>
+                </div>
+                <div class="ts-detail-stat">
+                  <span class="ts-detail-stat-label">Stun</span>
+                  <span class="ts-detail-stat-value" v-text="detailDisplay.formattedStunDuration"></span>
+                </div>
+                <div class="ts-detail-stat">
+                  <span class="ts-detail-stat-label">Actions/hr</span>
+                  <span class="ts-detail-stat-value" v-text="detailDisplay.formattedActionsHr"></span>
+                </div>
+                <div class="ts-detail-stat">
+                  <span class="ts-detail-stat-label">XP/Action</span>
+                  <span class="ts-detail-stat-value" v-text="detailDisplay.formattedXpPerAction"></span>
+                </div>
+              </div>
+
+              <div class="ts-detail-section">
+                <div class="ts-detail-section-title">Loot Table</div>
+                <div class="ts-table-wrap">
+                  <table class="ts-table">
+                    <thead>
+                      <tr>
+                        <th class="ts-th ts-th--text">Drop</th>
+                        <th class="ts-th ts-th--text">Type</th>
+                        <th class="ts-th ts-th--num">Chance</th>
+                        <th class="ts-th ts-th--num">Qty</th>
+                        <th class="ts-th ts-th--num">/hour</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="loot in detailDisplay.lootTable" class="ts-row">
+                        <td class="ts-td ts-td--text" v-text="loot.name"></td>
+                        <td class="ts-td ts-td--text">
+                          <span class="ts-loot-category" v-text="loot.categoryLabel"></span>
+                        </td>
+                        <td class="ts-td ts-td--num" v-text="loot.formattedChance"></td>
+                        <td class="ts-td ts-td--num" v-text="loot.formattedQuantity"></td>
+                        <td class="ts-td ts-td--num" v-text="loot.formattedPerHour"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="ts-detail-section">
+                <div class="ts-detail-section-title">Drop Confidence</div>
+                <div class="ts-detail-section-desc">Probability of receiving at least one drop in N actions.</div>
+                <div class="ts-confidence-controls">
+                  <div class="ts-confidence-input-group">
+                    <label class="ts-confidence-label">Attempts:</label>
+                    <input
+                      class="ts-confidence-input"
+                      type="number"
+                      min="1"
+                      v-model="confidenceInput"
+                      @change="applyConfidenceInput"
+                      @keyup.enter="applyConfidenceInput"
+                    />
+                  </div>
+                  <div class="ts-confidence-presets">
+                    <button class="ts-confidence-preset" @click="setConfidenceAttempts(100)">100</button>
+                    <button class="ts-confidence-preset" @click="setConfidenceAttempts(500)">500</button>
+                    <button class="ts-confidence-preset" @click="setConfidenceAttempts(1000)">1K</button>
+                    <button class="ts-confidence-preset" @click="setConfidenceAttempts(5000)">5K</button>
+                    <button class="ts-confidence-preset" @click="setConfidenceAttempts(10000)">10K</button>
+                    <button class="ts-confidence-preset" @click="setConfidenceAttempts(50000)">50K</button>
+                  </div>
+                </div>
+                <div class="ts-table-wrap">
+                  <table class="ts-table">
+                    <thead>
+                      <tr>
+                        <th class="ts-th ts-th--text">Drop</th>
+                        <th class="ts-th ts-th--num">Per Action</th>
+                        <th class="ts-th ts-th--num" v-text="'P(≥1 in ' + confidenceAttempts + ')'"></th>
+                        <th class="ts-th ts-th--num">50%</th>
+                        <th class="ts-th ts-th--num">90%</th>
+                        <th class="ts-th ts-th--num">99%</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="conf in detailDisplay.confidenceTable" class="ts-row">
+                        <td class="ts-td ts-td--text" v-text="conf.name"></td>
+                        <td class="ts-td ts-td--num" v-text="conf.formattedChance"></td>
+                        <td class="ts-td ts-td--num" v-text="conf.formattedProbability"></td>
+                        <td class="ts-td ts-td--num" v-text="conf.attemptsFor50"></td>
+                        <td class="ts-td ts-td--num" v-text="conf.attemptsFor90"></td>
+                        <td class="ts-td ts-td--num" v-text="conf.attemptsFor99"></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </div>
           </div>
           <div class="ts-equip-tab-wrap" v-if="activeTab === 'equipment'">

@@ -1,4 +1,9 @@
 import { Aggregator } from '../calc/aggregator';
+import {
+  buildLootTable,
+  calcAtLeastOneChance,
+  calcAttemptsForChance,
+} from '../calc/detail';
 import { calcThieving } from '../calc/thieving';
 import type {
   EquipmentOption,
@@ -7,11 +12,12 @@ import type {
   Potion,
   SummoningSynergyInfo,
   ThievingArea,
+  ThievingBoosts,
   ThievingLoadout,
   ThievingResult,
   ThievingTarget,
 } from '../calc/types';
-import { RealmName } from '../calc/types';
+import { RealmName } from '../constants/game.constants';
 import type { ThievingRealmId } from '../constants/item-ids';
 import { ThievingEquipmentSlotId } from '../constants/item-ids';
 import { applyOverrides } from '../state/overrides';
@@ -138,6 +144,9 @@ interface MainModalScope {
   synergyDisplayOptions: SynergyOptionDisplay[];
   agilitySlots: AgilitySlotDisplay[];
   hasAnyOverride: boolean;
+  detailDisplay: NpcDetailDisplay | null;
+  confidenceAttempts: number;
+  confidenceInput: string;
   setIsOpen: () => void;
   setActiveTab: (tab: ModalTab) => void;
   setRealmFilter: (filter: RealmFilter) => void;
@@ -155,6 +164,10 @@ interface MainModalScope {
   clearSynergy: () => void;
   clearAgilitySlot: (display: AgilitySlotDisplay) => void;
   resetAll: () => void;
+  selectTarget: (row: ComparisonRow) => void;
+  backToTable: () => void;
+  setConfidenceAttempts: (count: number) => void;
+  applyConfidenceInput: () => void;
 }
 
 const SLOT_DISPLAY_NAMES: Readonly<Record<string, string>> = {
@@ -241,9 +254,7 @@ export function buildConfigDisplay(loadout: ThievingLoadout): ConfigDisplay {
       );
     }
     if (pillarCount > 0) {
-      parts.push(
-        `${pillarCount} ${pillarCount === 1 ? 'pillar' : 'pillars'}`,
-      );
+      parts.push(`${pillarCount} ${pillarCount === 1 ? 'pillar' : 'pillars'}`);
     }
     agilitySummary = parts.join(', ');
   }
@@ -271,9 +282,7 @@ export function buildEquipmentSlots(
   loadout: ThievingLoadout,
   overrides: LoadoutOverrides,
 ): EquipmentSlotDisplay[] {
-  const equippedBySlot = new Map(
-    loadout.equipment.map((e) => [e.slotId, e]),
-  );
+  const equippedBySlot = new Map(loadout.equipment.map((e) => [e.slotId, e]));
   const overriddenSlots = new Set(
     overrides.equipment ? Object.keys(overrides.equipment) : [],
   );
@@ -360,6 +369,136 @@ export function buildAgilitySlots(
   return slots;
 }
 
+export interface LootEntryDisplay {
+  name: string;
+  categoryLabel: string;
+  formattedChance: string;
+  formattedQuantity: string;
+  formattedPerHour: string;
+  chancePerAction: number;
+}
+
+export interface ConfidenceDisplay {
+  name: string;
+  formattedChance: string;
+  formattedProbability: string;
+  attemptsFor50: string;
+  attemptsFor90: string;
+  attemptsFor99: string;
+}
+
+export interface NpcDetailDisplay {
+  name: string;
+  area: string;
+  level: number;
+  realm: string;
+  masteryLevel: number;
+  formattedSuccessRate: string;
+  formattedXpHr: string;
+  formattedCurrencyHr: string;
+  currencyLabel: string;
+  formattedDouble: string;
+  formattedInterval: string;
+  formattedStunDuration: string;
+  formattedActionsHr: string;
+  formattedXpPerAction: string;
+  formattedNpcUniqueChance: string;
+  lootTable: LootEntryDisplay[];
+  confidenceTable: ConfidenceDisplay[];
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  currency: 'Currency',
+  common: 'Common',
+  npcUnique: 'Unique',
+  areaUnique: 'Area',
+  genericRare: 'Rare',
+};
+
+/** Builds the per-NPC detail display from a target, its area, loadout, and mastery level. */
+export function buildNpcDetail(
+  target: ThievingTarget,
+  areas: ThievingArea[],
+  loadout: ThievingLoadout,
+  masteryLevel: number,
+  confidenceAttempts: number,
+): NpcDetailDisplay {
+  const aggregator = new Aggregator();
+  const npcLoadout: ThievingLoadout = { ...loadout, masteryLevel };
+  const boosts: ThievingBoosts = aggregator.aggregateBoosts(
+    npcLoadout,
+    target.realmId as ThievingRealmId,
+  );
+  const result = calcThieving(target, boosts);
+  const area = areas.find((a) => a.name === target.area);
+  const lootEntries = buildLootTable(target, area, result, boosts);
+
+  const lootTable: LootEntryDisplay[] = lootEntries.map((entry) => ({
+    name: entry.name,
+    categoryLabel: CATEGORY_LABELS[entry.category] ?? entry.category,
+    formattedChance: formatPercent(
+      entry.chancePerSuccess,
+      entry.chancePerSuccess < 0.01 ? 4 : 2,
+    ),
+    formattedQuantity:
+      entry.quantity.min === entry.quantity.max
+        ? formatNumber(entry.quantity.min)
+        : `${formatNumber(entry.quantity.min)}–${formatNumber(entry.quantity.max)}`,
+    formattedPerHour: formatNumber(entry.expectedPerHour, 1),
+    chancePerAction: entry.chancePerAction,
+  }));
+
+  const confidenceEntries = lootEntries.filter(
+    (e) => e.chancePerAction > 0 && e.chancePerAction < 1,
+  );
+  const confidenceTable: ConfidenceDisplay[] = confidenceEntries.map(
+    (entry) => ({
+      name: entry.name,
+      formattedChance: formatPercent(
+        entry.chancePerAction,
+        entry.chancePerAction < 0.01 ? 4 : 2,
+      ),
+      formattedProbability: formatPercent(
+        calcAtLeastOneChance(entry.chancePerAction, confidenceAttempts),
+        1,
+      ),
+      attemptsFor50: formatNumber(
+        calcAttemptsForChance(entry.chancePerAction, 0.5),
+      ),
+      attemptsFor90: formatNumber(
+        calcAttemptsForChance(entry.chancePerAction, 0.9),
+      ),
+      attemptsFor99: formatNumber(
+        calcAttemptsForChance(entry.chancePerAction, 0.99),
+      ),
+    }),
+  );
+
+  const realmLabel =
+    target.realmId === 'melvorItA:Abyssal' ? 'Abyssal' : 'Melvor';
+
+  return {
+    name: target.name,
+    area: target.area,
+    level: target.level,
+    realm: realmLabel,
+    masteryLevel,
+    formattedSuccessRate: formatPercent(result.successRate),
+    formattedXpHr: formatNumber(result.xpPerHour),
+    formattedCurrencyHr: formatNumber(result.currencyPerHour),
+    currencyLabel: target.currencyType === 'ap' ? 'AP' : 'GP',
+    formattedDouble: formatPercent(result.doubleChance),
+    formattedInterval: (result.effectiveIntervalMs / 1000).toFixed(2) + 's',
+    formattedStunDuration:
+      (result.effectiveStunDurationMs / 1000).toFixed(2) + 's',
+    formattedActionsHr: formatNumber(result.actionsPerHour),
+    formattedXpPerAction: formatNumber(result.xpPerAction, 1),
+    formattedNpcUniqueChance: formatPercent(result.npcUniqueChance, 4),
+    lootTable,
+    confidenceTable,
+  };
+}
+
 /** Returns true if any override field is set (not undefined). */
 function hasOverrides(overrides: LoadoutOverrides): boolean {
   return Object.values(overrides).some((v) => v !== undefined);
@@ -438,6 +577,7 @@ export default function MainModal(
   let importedLoadout: ThievingLoadout | null = null;
   let importedMasteryLevels: Map<string, number> | null = null;
   let currentOverrides: LoadoutOverrides = {};
+  let selectedTargetRow: ComparisonRow | null = null;
 
   function getActiveLoadout(): ThievingLoadout {
     return applyOverrides(importedLoadout!, currentOverrides);
@@ -464,6 +604,16 @@ export default function MainModal(
     scope.agilitySlots = buildAgilitySlots(importedLoadout!, currentOverrides);
     scope.hasAnyOverride = hasOverrides(currentOverrides);
     scope.recomputeFilteredRows();
+
+    if (selectedTargetRow) {
+      scope.detailDisplay = buildNpcDetail(
+        selectedTargetRow.target,
+        props.areas,
+        activeLoadout,
+        selectedTargetRow.masteryLevel,
+        scope.confidenceAttempts,
+      );
+    }
   }
 
   return {
@@ -485,6 +635,9 @@ export default function MainModal(
     synergyDisplayOptions: [],
     agilitySlots: [],
     hasAnyOverride: false,
+    detailDisplay: null,
+    confidenceAttempts: 1000,
+    confidenceInput: '1000',
 
     setIsOpen() {
       this.isOpen = !this.isOpen;
@@ -524,9 +677,11 @@ export default function MainModal(
       importedLoadout = loadout;
       importedMasteryLevels = masteryLevels;
       currentOverrides = {};
+      selectedTargetRow = null;
       this.hasImported = true;
       this.selectedSlot = null;
       this.slotOptions = [];
+      this.detailDisplay = null;
       refreshDisplay(this);
     },
 
@@ -650,6 +805,45 @@ export default function MainModal(
       this.selectedSlot = null;
       this.slotOptions = [];
       refreshDisplay(this);
+    },
+
+    selectTarget(row: ComparisonRow) {
+      if (!importedLoadout || !importedMasteryLevels) return;
+      selectedTargetRow = row;
+      const activeLoadout = getActiveLoadout();
+      this.detailDisplay = buildNpcDetail(
+        row.target,
+        props.areas,
+        activeLoadout,
+        row.masteryLevel,
+        this.confidenceAttempts,
+      );
+    },
+
+    backToTable() {
+      selectedTargetRow = null;
+      this.detailDisplay = null;
+    },
+
+    setConfidenceAttempts(count: number) {
+      if (!selectedTargetRow || !importedLoadout) return;
+      this.confidenceAttempts = count;
+      this.confidenceInput = String(count);
+      const activeLoadout = getActiveLoadout();
+      this.detailDisplay = buildNpcDetail(
+        selectedTargetRow.target,
+        props.areas,
+        activeLoadout,
+        selectedTargetRow.masteryLevel,
+        count,
+      );
+    },
+
+    applyConfidenceInput() {
+      const parsed = parseInt(this.confidenceInput, 10);
+      if (!isNaN(parsed) && parsed > 0) {
+        this.setConfidenceAttempts(parsed);
+      }
     },
   };
 }

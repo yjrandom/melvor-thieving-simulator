@@ -734,3 +734,184 @@
   text-transform: uppercase;
   letter-spacing: 0.3px;
 }
+
+/* Clickable rows */
+
+.ts-row--clickable {
+  cursor: pointer;
+}
+
+/* Per-target detail view */
+
+.ts-detail {
+  padding: 0;
+}
+
+.ts-detail-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #333;
+}
+
+.ts-detail-back {
+  padding: 4px 12px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #2d2d2d;
+  color: #aaa;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 10px;
+}
+
+.ts-detail-back:hover {
+  background: #3a3a3a;
+  color: #ddd;
+}
+
+.ts-detail-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.ts-detail-name {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #e1e1e1;
+}
+
+.ts-detail-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #888;
+  font-size: 0.85rem;
+}
+
+/* Stats grid */
+
+.ts-detail-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1px;
+  padding: 0;
+  background: #333;
+  border-bottom: 1px solid #333;
+}
+
+.ts-detail-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 8px;
+  background: #1a1a2e;
+}
+
+.ts-detail-stat-label {
+  color: #8899aa;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.ts-detail-stat-value {
+  color: #e1e1e1;
+  font-size: 1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Detail sections */
+
+.ts-detail-section {
+  padding: 16px 20px;
+  border-bottom: 1px solid #333;
+}
+
+.ts-detail-section-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #e1e1e1;
+  margin-bottom: 4px;
+}
+
+.ts-detail-section-desc {
+  font-size: 0.8rem;
+  color: #888;
+  margin-bottom: 12px;
+}
+
+.ts-loot-category {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  background: #2a3a5c;
+  color: #7eb8da;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+/* Confidence calculator */
+
+.ts-confidence-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.ts-confidence-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ts-confidence-label {
+  color: #8899aa;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.ts-confidence-input {
+  width: 100px;
+  padding: 6px 10px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #12101e;
+  color: #e1e1e1;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ts-confidence-input:focus {
+  outline: none;
+  border-color: #7eb8da;
+}
+
+.ts-confidence-presets {
+  display: flex;
+  gap: 4px;
+}
+
+.ts-confidence-preset {
+  padding: 5px 12px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background: #2d2d2d;
+  color: #aaa;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.ts-confidence-preset:hover {
+  background: #3a3a3a;
+  color: #ddd;
+}

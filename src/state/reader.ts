@@ -15,7 +15,7 @@ import type {
   ThievingLoadout,
   ThievingTarget,
 } from '../calc/types';
-import { RealmName } from '../calc/types';
+import { RealmName } from '../constants/game.constants';
 import {
   ThievingBoostId,
   ThievingEquipmentSlotId,
