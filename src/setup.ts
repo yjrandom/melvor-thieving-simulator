@@ -15,11 +15,16 @@ export function setup(ctx: Modding.ModContext) {
 
     const targets = readTargets(game.thieving);
     const areas = readAreas(game.thieving);
-    const loadout = readLoadout(game);
-    const masteryLevels = readAllMasteryLevels(game.thieving);
 
     const component = ui.createStore(
-      MainModal({ targets, areas, loadout, masteryLevels }),
+      MainModal({
+        targets,
+        areas,
+        onImport: () => ({
+          loadout: readLoadout(game),
+          masteryLevels: readAllMasteryLevels(game.thieving),
+        }),
+      }),
     );
     ui.create(component, document.body);
 

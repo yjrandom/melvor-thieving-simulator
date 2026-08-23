@@ -218,10 +218,10 @@ Without this, the mod is a read-only stats viewer — not a simulator. Deferred 
 
 ### 4.2 Configuration panel
 
-**Status:** Ready
+**Status:** Partial
 **Why:** Import button + override controls. Where the user selects hypothetical loadouts.
 
-- [ ] "Import from character" button
+- [x] "Import from character" button
 - [ ] Equipment slot selectors (thieving-relevant slots only)
 - [ ] Potion selector (tier dropdown)
 - [ ] Prayer toggles
