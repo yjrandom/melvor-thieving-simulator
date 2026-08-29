@@ -53,6 +53,7 @@ export interface EquippedItemEntry {
   itemId: string;
   itemName: string;
   modifiers: Modifier[];
+  mediaUrl?: string;
 }
 
 export interface Potion {
@@ -60,6 +61,7 @@ export interface Potion {
   itemName: string;
   tier: number;
   modifiers: Modifier[];
+  mediaUrl?: string;
 }
 
 export interface Prayer {
@@ -106,6 +108,8 @@ export interface SummoningSynergyInfo {
   name: string;
   description: string;
   modifiers: Modifier[];
+  summon1MediaUrl?: string;
+  summon2MediaUrl?: string;
 }
 
 export interface ThievingLoadout {
@@ -210,6 +214,7 @@ export interface EquipmentOption {
   itemId: string;
   itemName: string;
   modifiers: Modifier[];
+  mediaUrl?: string;
 }
 
 export interface ThievingResult {

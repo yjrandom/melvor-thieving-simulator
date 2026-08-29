@@ -112,6 +112,7 @@ function readEquipment(player: Player): EquippedItemEntry[] {
       itemId: item.id,
       itemName: item.name,
       modifiers: resolveModifiers((item as EquipmentItem).modifiers),
+      mediaUrl: item.media,
     });
   }
   return entries;
@@ -153,6 +154,7 @@ function readActivePotion(
     itemName: potion.name,
     tier: potion.tier,
     modifiers: resolveModifiers(potion.stats.modifiers),
+    mediaUrl: potion.media,
   };
 }
 
@@ -266,6 +268,8 @@ function readActiveSynergy(player: Player): SummoningSynergyInfo | undefined {
     name: synergy.name,
     description: synergy.description,
     modifiers: resolveModifiers(synergy.modifiers),
+    summon1MediaUrl: synergy.summons[0].product.media,
+    summon2MediaUrl: synergy.summons[1].product.media,
   };
 }
 
@@ -300,6 +304,7 @@ export function readEquipmentOptions(
         itemId: item.id,
         itemName: item.name,
         modifiers: resolveModifiers(item.modifiers),
+        mediaUrl: item.media,
       });
     }
   }
@@ -309,6 +314,51 @@ export function readEquipmentOptions(
   }
 
   return optionsBySlot;
+}
+
+/**
+ * Ensures familiar tablets from thieving synergies appear in SUMMON1/SUMMON2 equipment options.
+ *
+ * Synergy bonuses are on the synergy, not on individual tablets, so tablets may lack
+ * direct thieving modifiers and get filtered out by `readEquipmentOptions`. This function
+ * injects any missing familiar products from the provided synergies into the summon slots.
+ */
+export function injectSynergyFamiliars(
+  optionsBySlot: Record<string, EquipmentOption[]>,
+  synergies: SummoningSynergyInfo[],
+  game: Game,
+): void {
+  const summonSlotIds = [
+    ThievingEquipmentSlotId.SUMMON1,
+    ThievingEquipmentSlotId.SUMMON2,
+  ];
+
+  const familiarIds = new Set<string>();
+  for (const syn of synergies) {
+    familiarIds.add(syn.summon1Id);
+    familiarIds.add(syn.summon2Id);
+  }
+
+  for (const slotId of summonSlotIds) {
+    const slotOptions = optionsBySlot[slotId] ?? [];
+    optionsBySlot[slotId] = slotOptions;
+    const existing = new Set(slotOptions.map((o) => o.itemId));
+
+    for (const familiarId of familiarIds) {
+      if (existing.has(familiarId)) continue;
+      const item = game.items.equipment.getObjectByID(familiarId);
+      if (!item) continue;
+
+      slotOptions.push({
+        itemId: item.id,
+        itemName: item.name,
+        modifiers: resolveModifiers(item.modifiers),
+        mediaUrl: item.media,
+      });
+    }
+
+    slotOptions.sort((a, b) => a.itemName.localeCompare(b.itemName));
+  }
 }
 
 /**
@@ -324,6 +374,7 @@ export function readPotionOptions(game: Game): Potion[] {
       itemName: p.name,
       tier: p.tier,
       modifiers: resolveModifiers(p.stats.modifiers),
+      mediaUrl: p.media,
     }))
     .sort((a, b) => a.itemName.localeCompare(b.itemName));
 }
@@ -347,6 +398,8 @@ export function readSynergyOptions(game: Game): SummoningSynergyInfo[] {
       name: syn.name,
       description: syn.description,
       modifiers: resolveModifiers(syn.modifiers),
+      summon1MediaUrl: syn.summons[0].product.media,
+      summon2MediaUrl: syn.summons[1].product.media,
     }));
 }
 

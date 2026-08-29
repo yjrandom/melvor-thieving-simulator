@@ -19,8 +19,8 @@ Derived from `constitution.md` and actual project state.
 | 1     | [phase-1.md](phase-1.md)   | Loadout configuration & boost aggregation        | Done   |
 | 2     | [phase-2.md](phase-2.md)   | Harden the calculation engine                    | Done   |
 | 3     | [phase-3.md](phase-3.md)   | Loadout editing (hypothetical overrides)         | Done   |
-| 4     | [phase-4.md](phase-4.md)   | UI (comparison table, config panel, detail view) | Partial |
-| 5     | [phase-5.md](phase-5.md)   | UI polish & UX improvements                      | Ready  |
+| 4     | [phase-4.md](phase-4.md)   | UI (comparison table, config panel, detail view) | Done    |
+| 5     | [phase-5.md](phase-5.md)   | UI polish & UX improvements                      | Partial |
 
 ## Resolved Decisions
 

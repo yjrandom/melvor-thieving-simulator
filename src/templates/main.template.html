@@ -4,7 +4,7 @@
       <div class="ts-header">
         <h2 class="ts-title">Thieving Simulator</h2>
         <div class="ts-header-actions">
-          <div class="ts-realm-tabs" v-if="hasImported && activeTab === 'simulate'">
+          <div class="ts-realm-tabs" v-if="activeTab === 'simulate'">
             <button class="ts-tab" :class="{ 'ts-tab--active': realmFilter === 'all' }" @click="setRealmFilter('all')">All</button>
             <button class="ts-tab" :class="{ 'ts-tab--active': realmFilter === 'melvor' }" @click="setRealmFilter('melvor')">Melvor</button>
             <button class="ts-tab" :class="{ 'ts-tab--active': realmFilter === 'abyssal' }" @click="setRealmFilter('abyssal')">Abyssal</button>
@@ -13,7 +13,7 @@
         </div>
       </div>
       <div class="ts-modal-content">
-        <div class="ts-sidebar" v-if="hasImported">
+        <div class="ts-sidebar">
           <button class="ts-sidebar-tab" :class="{ 'ts-sidebar-tab--active': activeTab === 'simulate' }" @click="setActiveTab('simulate')">
             <svg class="ts-sidebar-icon" viewBox="0 0 20 20" fill="currentColor">
               <rect x="2" y="10" width="4" height="8" rx="1"/>

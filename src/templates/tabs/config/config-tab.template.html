@@ -12,26 +12,11 @@
           class="ts-config-option"
           :class="{ 'ts-config-option--selected': potion.isSelected }"
           @click="selectPotion(potion)"
-          v-text="potion.itemName"
-        ></button>
-      </div>
-    </div>
-
-    <div class="ts-config-panel">
-      <div class="ts-config-panel-header">
-        <span class="ts-config-panel-title">Summoning Synergy</span>
-        <button class="ts-config-panel-clear" @click="clearSynergy">Clear</button>
-      </div>
-      <div class="ts-config-panel-body">
-        <div class="ts-config-panel-empty" v-if="!synergyDisplayOptions.length">No thieving synergies found.</div>
-        <button
-          v-for="syn in synergyDisplayOptions"
-          class="ts-config-option"
-          :class="{ 'ts-config-option--selected': syn.isSelected }"
-          @click="selectSynergy(syn)"
         >
-          <span class="ts-config-option-name" v-text="syn.name"></span>
-          <span class="ts-config-option-desc" v-text="syn.description"></span>
+          <span class="ts-config-option-header">
+            <img v-if="potion.mediaUrl" :src="potion.mediaUrl" class="ts-item-icon--sm" />
+            <span class="ts-config-option-name" v-text="potion.itemName"></span>
+          </span>
         </button>
       </div>
     </div>

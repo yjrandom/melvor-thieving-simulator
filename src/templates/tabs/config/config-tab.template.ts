@@ -7,6 +7,7 @@ export interface EquipmentDisplayEntry {
   slotName: string;
   /** Game item name. */
   itemName: string;
+  mediaUrl?: string;
 }
 
 export interface ConfigDisplay {
@@ -36,6 +37,7 @@ export function buildConfigDisplay(loadout: ThievingLoadout): ConfigDisplay {
     (entry): EquipmentDisplayEntry => ({
       slotName: getSlotDisplayName(entry.slotId),
       itemName: entry.itemName,
+      ...(entry.mediaUrl !== undefined && { mediaUrl: entry.mediaUrl }),
     }),
   );
 

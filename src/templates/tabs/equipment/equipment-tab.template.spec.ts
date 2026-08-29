@@ -1,4 +1,4 @@
-import type { LoadoutOverrides, ThievingLoadout } from '../../../calc/types';
+import type { EquipmentOption, LoadoutOverrides, ThievingLoadout } from '../../../calc/types';
 import { ThievingEquipmentSlotId } from '../../../constants/item-ids';
 import {
   buildEquipmentSlots,
@@ -162,6 +162,55 @@ describe('EquipmentTabTemplate', () => {
         expect(slot.slotName).not.toBe('');
         expect(slot.slotName).not.toContain(':');
       }
+    });
+
+    describe('disabled flag', () => {
+      const gloveOption: EquipmentOption = {
+        itemId: 'melvorF:Gloves1',
+        itemName: 'Thieving Gloves',
+        modifiers: [],
+      };
+
+      it('should mark slot as enabled when it has available options', () => {
+        const loadout = makeLoadout();
+        const options: Record<string, EquipmentOption[]> = {
+          [ThievingEquipmentSlotId.GLOVES]: [gloveOption],
+        };
+        const slots = buildEquipmentSlots(loadout, {}, options);
+        const glovesSlot = slots.find(
+          (s) => s.slotId === ThievingEquipmentSlotId.GLOVES,
+        )!;
+        expect(glovesSlot.disabled).toBe(false);
+      });
+
+      it('should mark slot as disabled when missing from options map', () => {
+        const loadout = makeLoadout();
+        const slots = buildEquipmentSlots(loadout, {}, {});
+        const helmetSlot = slots.find(
+          (s) => s.slotId === ThievingEquipmentSlotId.HELMET,
+        )!;
+        expect(helmetSlot.disabled).toBe(true);
+      });
+
+      it('should mark slot as disabled when present but empty array', () => {
+        const loadout = makeLoadout();
+        const options: Record<string, EquipmentOption[]> = {
+          [ThievingEquipmentSlotId.HELMET]: [],
+        };
+        const slots = buildEquipmentSlots(loadout, {}, options);
+        const helmetSlot = slots.find(
+          (s) => s.slotId === ThievingEquipmentSlotId.HELMET,
+        )!;
+        expect(helmetSlot.disabled).toBe(true);
+      });
+
+      it('should mark all slots as disabled when no options provided', () => {
+        const loadout = makeLoadout();
+        const slots = buildEquipmentSlots(loadout, {});
+        for (const slot of slots) {
+          expect(slot.disabled).toBe(true);
+        }
+      });
     });
   });
 });

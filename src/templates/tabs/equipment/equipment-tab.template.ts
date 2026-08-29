@@ -1,4 +1,5 @@
 import type {
+  EquipmentOption,
   LoadoutOverrides,
   ThievingLoadout,
 } from '../../../calc/types';
@@ -10,6 +11,9 @@ export interface EquipmentSlotDisplay {
   itemName: string;
   hasItem: boolean;
   isOverridden: boolean;
+  /** True when the slot has no selectable equipment options. */
+  disabled: boolean;
+  mediaUrl?: string;
   gridRow: number;
   gridCol: number;
 }
@@ -73,6 +77,7 @@ export function getSlotDisplayName(slotId: string): string {
 export function buildEquipmentSlots(
   loadout: ThievingLoadout,
   overrides: LoadoutOverrides,
+  availableOptions: Record<string, EquipmentOption[]> = {},
 ): EquipmentSlotDisplay[] {
   const equippedBySlot = new Map(loadout.equipment.map((e) => [e.slotId, e]));
   const overriddenSlots = new Set(
@@ -82,12 +87,15 @@ export function buildEquipmentSlots(
   return Object.values(ThievingEquipmentSlotId).map((slotId) => {
     const equipped = equippedBySlot.get(slotId);
     const pos = SLOT_GRID_POSITIONS[slotId] ?? { row: 0, col: 0 };
+    const options = availableOptions[slotId];
     return {
       slotId,
       slotName: getSlotDisplayName(slotId),
       itemName: equipped?.itemName ?? 'Empty',
       hasItem: equipped !== undefined,
       isOverridden: overriddenSlots.has(slotId),
+      disabled: !options || options.length === 0,
+      ...(equipped?.mediaUrl !== undefined && { mediaUrl: equipped.mediaUrl }),
       gridRow: pos.row,
       gridCol: pos.col,
     };

@@ -1,4 +1,5 @@
 import {
+  injectSynergyFamiliars,
   readAllMasteryLevels,
   readAreas,
   readEquipmentOptions,
@@ -26,6 +27,7 @@ export function setup(ctx: Modding.ModContext) {
     const equipmentOptions = readEquipmentOptions(game);
     const potionOptions = readPotionOptions(game);
     const synergyOptions = readSynergyOptions(game);
+    injectSynergyFamiliars(equipmentOptions, synergyOptions, game);
 
     const component = ui.createStore(
       MainModal({

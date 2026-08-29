@@ -1,4 +1,5 @@
 import type {
+  EquipmentOption,
   LoadoutOverrides,
   Potion,
   SummoningSynergyInfo,
@@ -8,6 +9,8 @@ import {
   buildAgilitySlots,
   buildPotionOptions,
   buildSynergyOptions,
+  findEquipmentForFamiliar,
+  findMatchingSynergy,
 } from './main.template';
 
 function makeLoadout(
@@ -166,6 +169,74 @@ describe('MainModal', () => {
     it('should return empty when no course is loaded', () => {
       const result = buildAgilitySlots(makeLoadout(), {});
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('findMatchingSynergy', () => {
+    const synergies: SummoningSynergyInfo[] = [
+      {
+        summon1Id: 'melvorD:Leprechaun',
+        summon2Id: 'melvorD:Monkey',
+        name: 'Leprechaun + Monkey',
+        description: 'Auto-sell',
+        modifiers: [],
+      },
+      {
+        summon1Id: 'melvorD:Leprechaun',
+        summon2Id: 'melvorD:Devil',
+        name: 'Leprechaun + Devil',
+        description: 'Gamble',
+        modifiers: [],
+      },
+    ];
+
+    it('should find a matching synergy pair', () => {
+      const result = findMatchingSynergy('melvorD:Leprechaun', 'melvorD:Monkey', synergies);
+      expect(result).toBe(synergies[0]);
+    });
+
+    it('should find a match with reversed order', () => {
+      const result = findMatchingSynergy('melvorD:Monkey', 'melvorD:Leprechaun', synergies);
+      expect(result).toBe(synergies[0]);
+    });
+
+    it('should return undefined when no match exists', () => {
+      const result = findMatchingSynergy('melvorD:Monkey', 'melvorD:Devil', synergies);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined with only one summon ID', () => {
+      const result = findMatchingSynergy('melvorD:Leprechaun', undefined, synergies);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when both IDs are undefined', () => {
+      const result = findMatchingSynergy(undefined, undefined, synergies);
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('findEquipmentForFamiliar', () => {
+    const options: Record<string, EquipmentOption[]> = {
+      'melvorD:Summon1': [
+        { itemId: 'melvorD:Leprechaun', itemName: 'Leprechaun', modifiers: [] },
+        { itemId: 'melvorD:Monkey', itemName: 'Monkey', modifiers: [] },
+      ],
+    };
+
+    it('should find the equipment option by familiar ID', () => {
+      const result = findEquipmentForFamiliar('melvorD:Summon1', 'melvorD:Leprechaun', options);
+      expect(result).toEqual(options['melvorD:Summon1'][0]);
+    });
+
+    it('should return undefined when familiar is not in the slot', () => {
+      const result = findEquipmentForFamiliar('melvorD:Summon1', 'melvorD:Devil', options);
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined when slot has no options', () => {
+      const result = findEquipmentForFamiliar('melvorD:Summon2', 'melvorD:Leprechaun', options);
+      expect(result).toBeUndefined();
     });
   });
 });

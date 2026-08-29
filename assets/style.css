@@ -461,6 +461,12 @@
   border-color: #c9a54e;
 }
 
+.ts-equip-cell--disabled {
+  opacity: 0.35;
+  pointer-events: none;
+  cursor: default;
+}
+
 .ts-equip-cell--overridden.ts-equip-cell--active {
   border-color: #7eb8da;
 }
@@ -483,6 +489,20 @@
 .ts-equip-cell-item--empty {
   color: #555;
   font-style: italic;
+}
+
+/* Item icons */
+
+.ts-item-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+.ts-item-icon--sm {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
 }
 
 /* Equipment picker panel */
@@ -535,7 +555,9 @@
 }
 
 .ts-equip-picker-item {
-  display: block;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
   width: 100%;
   padding: 8px 16px;
   color: #c8c8c8;
@@ -545,6 +567,21 @@
   border: none;
   background: transparent;
   text-align: left;
+}
+
+.ts-picker-item-name {
+  font-weight: 500;
+}
+
+.ts-picker-item-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ts-picker-item-mods {
+  font-size: 0.75rem;
+  color: #8899aa;
 }
 
 .ts-equip-picker-item:hover {
@@ -563,6 +600,12 @@
   color: #555;
   font-size: 0.85rem;
   font-style: italic;
+}
+
+.ts-synergy-panel {
+  padding: 12px 20px;
+  border-top: 1px solid #333;
+  flex-shrink: 0;
 }
 
 .ts-equip-actions {
@@ -665,6 +708,12 @@
   background: #16213e;
   border-left: 3px solid #7eb8da;
   color: #e8e8e8;
+}
+
+.ts-config-option-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .ts-config-option-name {

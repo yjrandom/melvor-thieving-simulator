@@ -9,7 +9,14 @@ import type {
   ThievingTarget,
 } from '../calc/types';
 import { RealmName } from '../constants/game.constants';
+import { ThievingEquipmentSlotId } from '../constants/item-ids';
 import { applyOverrides } from '../state/overrides';
+import { formatModifiers } from '../utils/modifier-format';
+
+const SUMMON_SLOT_IDS = new Set<string>([
+  ThievingEquipmentSlotId.SUMMON1,
+  ThievingEquipmentSlotId.SUMMON2,
+]);
 import {
   buildNpcDetail,
   type NpcDetailDisplay,
@@ -40,6 +47,7 @@ export interface PotionOptionDisplay {
   itemName: string;
   tier: number;
   isSelected: boolean;
+  mediaUrl?: string;
 }
 
 export interface SynergyOptionDisplay {
@@ -47,6 +55,8 @@ export interface SynergyOptionDisplay {
   name: string;
   description: string;
   isSelected: boolean;
+  summon1MediaUrl?: string;
+  summon2MediaUrl?: string;
 }
 
 export interface AgilitySlotDisplay {
@@ -82,7 +92,7 @@ interface MainModalScope {
   filteredRows: ComparisonRow[];
   equipmentSlots: EquipmentSlotDisplay[];
   selectedSlot: string | null;
-  slotOptions: EquipmentOption[];
+  slotOptions: (EquipmentOption & { formattedModifiers: string })[];
   selectedSlotName: string;
   potionDisplayOptions: PotionOptionDisplay[];
   synergyDisplayOptions: SynergyOptionDisplay[];
@@ -128,6 +138,7 @@ export function buildPotionOptions(
     itemName: p.itemName,
     tier: p.tier,
     isSelected: activePotion?.itemId === p.itemId,
+    ...(p.mediaUrl !== undefined && { mediaUrl: p.mediaUrl }),
   }));
 }
 
@@ -143,6 +154,8 @@ export function buildSynergyOptions(
     isSelected:
       activeSynergy?.summon1Id === s.summon1Id &&
       activeSynergy?.summon2Id === s.summon2Id,
+    ...(s.summon1MediaUrl !== undefined && { summon1MediaUrl: s.summon1MediaUrl }),
+    ...(s.summon2MediaUrl !== undefined && { summon2MediaUrl: s.summon2MediaUrl }),
   }));
 }
 
@@ -185,21 +198,89 @@ export function buildAgilitySlots(
   return slots;
 }
 
+/**
+ * Finds a synergy matching both summon familiar item IDs (order-independent).
+ *
+ * @returns The matching synergy, or undefined if no pair matches.
+ */
+export function findMatchingSynergy(
+  summon1ItemId: string | undefined,
+  summon2ItemId: string | undefined,
+  synergies: SummoningSynergyInfo[],
+): SummoningSynergyInfo | undefined {
+  if (!summon1ItemId || !summon2ItemId) return undefined;
+  return synergies.find(
+    (s) =>
+      (s.summon1Id === summon1ItemId && s.summon2Id === summon2ItemId) ||
+      (s.summon1Id === summon2ItemId && s.summon2Id === summon1ItemId),
+  );
+}
+
+/**
+ * Finds the equipment option for a familiar in a given slot's options.
+ *
+ * @returns The matching equipment option, or undefined if not found.
+ */
+export function findEquipmentForFamiliar(
+  slotId: string,
+  familiarId: string,
+  equipmentOptions: Record<string, EquipmentOption[]>,
+): EquipmentOption | undefined {
+  return equipmentOptions[slotId]?.find((o) => o.itemId === familiarId);
+}
+
 /** Returns true if any override field is set (not undefined). */
 function hasOverrides(overrides: LoadoutOverrides): boolean {
   return Object.values(overrides).some((v) => v !== undefined);
 }
 
+export const ZERO_LOADOUT: ThievingLoadout = {
+  equipment: [],
+  masteryLevel: 1,
+  melvorMasteryPoolPercent: 0,
+  abyssalMasteryPoolPercent: 0,
+  activePotion: undefined,
+  activePrayers: undefined,
+  agilityObstacles: [],
+  agilityPillars: [],
+  astrologyConstellations: [],
+  activePets: [],
+  shopPurchases: [],
+  activeSummoningSynergy: undefined,
+  skillLevel: 1,
+  abyssalSkillLevel: 1,
+};
+
 export default function MainModal(
   props: MainModalInputProps,
 ): Component<MainModalScope> {
-  let importedLoadout: ThievingLoadout | null = null;
-  let importedMasteryLevels: Map<string, number> | null = null;
+  let importedLoadout: ThievingLoadout = ZERO_LOADOUT;
+  let importedMasteryLevels: Map<string, number> = new Map();
   let currentOverrides: LoadoutOverrides = {};
   let selectedTargetRow: ComparisonRow | null = null;
 
   function getActiveLoadout(): ThievingLoadout {
-    return applyOverrides(importedLoadout!, currentOverrides);
+    return applyOverrides(importedLoadout, currentOverrides);
+  }
+
+  /** Reads the effective item ID for a summon slot from overrides or the imported loadout. */
+  function getSummonItemId(slotId: string): string | undefined {
+    if (currentOverrides.equipment && slotId in currentOverrides.equipment) {
+      return currentOverrides.equipment[slotId]?.itemId;
+    }
+    return importedLoadout.equipment.find((e) => e.slotId === slotId)?.itemId;
+  }
+
+  /** Auto-sets or clears the synergy override based on the current summon slot state. */
+  function autoLinkSynergy(): void {
+    const summon1Id = getSummonItemId(ThievingEquipmentSlotId.SUMMON1);
+    const summon2Id = getSummonItemId(ThievingEquipmentSlotId.SUMMON2);
+    const match = findMatchingSynergy(summon1Id, summon2Id, props.synergyOptions);
+    if (match) {
+      currentOverrides.activeSummoningSynergy = match;
+    } else {
+      currentOverrides.activeSummoningSynergy = null;
+    }
   }
 
   /** Refreshes all derived display state from the current loadout and overrides. */
@@ -209,9 +290,9 @@ export default function MainModal(
     scope.allRows = buildRows(
       props.targets,
       activeLoadout,
-      importedMasteryLevels!,
+      importedMasteryLevels,
     );
-    scope.equipmentSlots = buildEquipmentSlots(activeLoadout, currentOverrides);
+    scope.equipmentSlots = buildEquipmentSlots(activeLoadout, currentOverrides, props.equipmentOptions);
     scope.potionDisplayOptions = buildPotionOptions(
       props.potionOptions,
       activeLoadout.activePotion,
@@ -220,7 +301,7 @@ export default function MainModal(
       props.synergyOptions,
       activeLoadout.activeSummoningSynergy,
     );
-    scope.agilitySlots = buildAgilitySlots(importedLoadout!, currentOverrides);
+    scope.agilitySlots = buildAgilitySlots(importedLoadout, currentOverrides);
     scope.hasAnyOverride = hasOverrides(currentOverrides);
     scope.recomputeFilteredRows();
 
@@ -235,23 +316,26 @@ export default function MainModal(
     }
   }
 
+  const initialRows = buildRows(props.targets, ZERO_LOADOUT, importedMasteryLevels);
+  const initialSorted = sortRows(initialRows, SortColumn.LEVEL, SortDirection.ASC);
+
   return {
     $template: '#ts-modal',
     isOpen: false,
     hasImported: false,
     activeTab: 'simulate' as ModalTab,
-    configDisplay: null,
+    configDisplay: buildConfigDisplay(ZERO_LOADOUT),
     realmFilter: 'all' as RealmFilter,
-    sortColumn: SortColumn.XP_HR,
-    sortDirection: SortDirection.DESC,
-    allRows: [],
-    filteredRows: [],
-    equipmentSlots: [],
+    sortColumn: SortColumn.LEVEL,
+    sortDirection: SortDirection.ASC,
+    allRows: initialRows,
+    filteredRows: initialSorted,
+    equipmentSlots: buildEquipmentSlots(ZERO_LOADOUT, {}, props.equipmentOptions),
     selectedSlot: null,
     slotOptions: [],
     selectedSlotName: '',
-    potionDisplayOptions: [],
-    synergyDisplayOptions: [],
+    potionDisplayOptions: buildPotionOptions(props.potionOptions, undefined),
+    synergyDisplayOptions: buildSynergyOptions(props.synergyOptions, undefined),
     agilitySlots: [],
     hasAnyOverride: false,
     detailDisplay: null,
@@ -327,14 +411,19 @@ export default function MainModal(
     },
 
     selectSlot(slotId: string) {
+      const options = props.equipmentOptions[slotId];
+      if (!options || options.length === 0) return;
+
       this.selectedSlot = slotId;
       this.selectedSlotName = getSlotDisplayName(slotId);
-      this.slotOptions = props.equipmentOptions[slotId] ?? [];
+      this.slotOptions = options.map((o) => ({
+        ...o,
+        formattedModifiers: formatModifiers(o.modifiers),
+      }));
     },
 
     selectItem(option: EquipmentOption | null) {
-      if (!this.selectedSlot || !importedLoadout || !importedMasteryLevels)
-        return;
+      if (!this.selectedSlot) return;
 
       const slotId = this.selectedSlot;
       if (!currentOverrides.equipment) currentOverrides.equipment = {};
@@ -345,21 +434,32 @@ export default function MainModal(
           itemId: option.itemId,
           itemName: option.itemName,
           modifiers: option.modifiers,
+          ...(option.mediaUrl !== undefined && { mediaUrl: option.mediaUrl }),
         };
         currentOverrides.equipment[slotId] = entry;
       } else {
         currentOverrides.equipment[slotId] = null;
       }
 
+      if (SUMMON_SLOT_IDS.has(slotId)) {
+        autoLinkSynergy();
+      }
+
       refreshDisplay(this);
     },
 
     clearSlot() {
+      if (this.selectedSlot && SUMMON_SLOT_IDS.has(this.selectedSlot)) {
+        if (!currentOverrides.equipment) currentOverrides.equipment = {};
+        currentOverrides.equipment[this.selectedSlot] = null;
+        autoLinkSynergy();
+        refreshDisplay(this);
+        return;
+      }
       this.selectItem(null);
     },
 
     resetEquipment() {
-      if (!importedLoadout || !importedMasteryLevels) return;
       delete currentOverrides.equipment;
       this.selectedSlot = null;
       this.slotOptions = [];
@@ -367,7 +467,6 @@ export default function MainModal(
     },
 
     selectPotion(display: PotionOptionDisplay) {
-      if (!importedLoadout || !importedMasteryLevels) return;
       const potion = props.potionOptions.find(
         (p) => p.itemId === display.itemId,
       );
@@ -382,13 +481,11 @@ export default function MainModal(
     },
 
     clearPotion() {
-      if (!importedLoadout || !importedMasteryLevels) return;
       currentOverrides.activePotion = null;
       refreshDisplay(this);
     },
 
     selectSynergy(display: SynergyOptionDisplay) {
-      if (!importedLoadout || !importedMasteryLevels) return;
       const synergy = props.synergyOptions[display.index];
       if (!synergy) return;
 
@@ -396,18 +493,46 @@ export default function MainModal(
         delete currentOverrides.activeSummoningSynergy;
       } else {
         currentOverrides.activeSummoningSynergy = synergy;
+
+        if (!currentOverrides.equipment) currentOverrides.equipment = {};
+        const summon1Option = findEquipmentForFamiliar(
+          ThievingEquipmentSlotId.SUMMON1,
+          synergy.summon1Id,
+          props.equipmentOptions,
+        );
+        const summon2Option = findEquipmentForFamiliar(
+          ThievingEquipmentSlotId.SUMMON2,
+          synergy.summon2Id,
+          props.equipmentOptions,
+        );
+        if (summon1Option) {
+          currentOverrides.equipment[ThievingEquipmentSlotId.SUMMON1] = {
+            slotId: ThievingEquipmentSlotId.SUMMON1,
+            itemId: summon1Option.itemId,
+            itemName: summon1Option.itemName,
+            modifiers: summon1Option.modifiers,
+            ...(summon1Option.mediaUrl !== undefined && { mediaUrl: summon1Option.mediaUrl }),
+          };
+        }
+        if (summon2Option) {
+          currentOverrides.equipment[ThievingEquipmentSlotId.SUMMON2] = {
+            slotId: ThievingEquipmentSlotId.SUMMON2,
+            itemId: summon2Option.itemId,
+            itemName: summon2Option.itemName,
+            modifiers: summon2Option.modifiers,
+            ...(summon2Option.mediaUrl !== undefined && { mediaUrl: summon2Option.mediaUrl }),
+          };
+        }
       }
       refreshDisplay(this);
     },
 
     clearSynergy() {
-      if (!importedLoadout || !importedMasteryLevels) return;
       currentOverrides.activeSummoningSynergy = null;
       refreshDisplay(this);
     },
 
     clearAgilitySlot(display: AgilitySlotDisplay) {
-      if (!importedLoadout || !importedMasteryLevels) return;
       if (display.type === 'obstacle') {
         if (!currentOverrides.agilityObstacles) {
           currentOverrides.agilityObstacles = {};
@@ -423,7 +548,6 @@ export default function MainModal(
     },
 
     resetAll() {
-      if (!importedLoadout || !importedMasteryLevels) return;
       currentOverrides = {};
       this.selectedSlot = null;
       this.slotOptions = [];
@@ -431,7 +555,6 @@ export default function MainModal(
     },
 
     selectTarget(row: ComparisonRow) {
-      if (!importedLoadout || !importedMasteryLevels) return;
       selectedTargetRow = row;
       const activeLoadout = getActiveLoadout();
       this.detailDisplay = buildNpcDetail(
@@ -449,7 +572,7 @@ export default function MainModal(
     },
 
     setConfidenceAttempts(count: number) {
-      if (!selectedTargetRow || !importedLoadout) return;
+      if (!selectedTargetRow) return;
       this.confidenceAttempts = count;
       this.confidenceInput = String(count);
       const activeLoadout = getActiveLoadout();
