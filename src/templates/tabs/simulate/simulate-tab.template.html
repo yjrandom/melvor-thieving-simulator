@@ -4,54 +4,66 @@
       <span class="ts-config-heading">Loadout</span>
       <button class="ts-btn ts-btn--secondary" @click="importLoadout" v-text="hasImported ? 'Re-import' : 'Import Character'"></button>
     </div>
-    <div class="ts-config-grid">
-      <div class="ts-config-section ts-config-section--wide">
-        <div class="ts-config-label">Equipment</div>
-        <div class="ts-equip-grid" v-if="configDisplay.equipment.length">
-          <div class="ts-equip-entry" v-for="entry in configDisplay.equipment">
-            <img v-if="entry.mediaUrl" :src="entry.mediaUrl" class="ts-item-icon--sm" />
-            <span class="ts-equip-slot" v-text="entry.slotName + ':'"></span>
-            <span class="ts-equip-item" v-text="entry.itemName"></span>
+    <div class="ts-loadout-layout">
+      <div class="ts-loadout-equip">
+        <div class="ts-equip-paperdoll ts-equip-paperdoll--readonly">
+          <div
+            v-for="slot in equipmentSlots"
+            class="ts-equip-cell ts-equip-cell--readonly"
+            :class="{
+              'ts-equip-cell--filled': slot.hasItem,
+              'ts-equip-cell--overridden': slot.isOverridden
+            }"
+            :style="{ gridRow: slot.gridRow + 1, gridColumn: slot.gridCol + 1 }"
+          >
+            <span class="ts-equip-cell-label" v-text="slot.slotName"></span>
+            <img v-if="slot.mediaUrl" :src="slot.mediaUrl" class="ts-item-icon" />
+            <span
+              class="ts-equip-cell-item"
+              :class="{ 'ts-equip-cell-item--empty': !slot.hasItem }"
+              v-text="slot.hasItem ? slot.itemName : 'Empty'"
+            ></span>
           </div>
         </div>
-        <div class="ts-config-none" v-else>None</div>
       </div>
-      <div class="ts-config-section">
-        <div class="ts-config-label">Potion</div>
-        <div :class="configDisplay.potion === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.potion"></div>
-      </div>
-      <div class="ts-config-section">
-        <div class="ts-config-label">Prayers</div>
-        <div :class="configDisplay.prayerSummary === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.prayerSummary"></div>
-      </div>
-      <div class="ts-config-section">
-        <div class="ts-config-label">Synergy</div>
-        <div :class="configDisplay.synergy === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.synergy"></div>
-      </div>
-      <div class="ts-config-section">
-        <div class="ts-config-label">Agility</div>
-        <div :class="configDisplay.agilitySummary === 'No course loaded' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.agilitySummary"></div>
-      </div>
-      <div class="ts-config-section ts-config-section--wide">
-        <div class="ts-config-label">Character</div>
-        <div class="ts-config-stats">
-          <span>Level <span v-text="configDisplay.skillLevel"></span></span>
-          <span class="ts-config-sep">&middot;</span>
-          <span>Abyssal <span v-text="configDisplay.abyssalSkillLevel"></span></span>
-          <span class="ts-config-sep">&middot;</span>
-          <span>Pool <span v-text="configDisplay.melvorPool"></span></span>
-          <span class="ts-config-sep">&middot;</span>
-          <span>Abyssal <span v-text="configDisplay.abyssalPool"></span></span>
+      <div class="ts-loadout-stats">
+        <div class="ts-config-section">
+          <div class="ts-config-label">Potion</div>
+          <div :class="configDisplay.potion === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.potion"></div>
         </div>
-      </div>
-      <div class="ts-config-section ts-config-section--wide">
-        <div class="ts-config-label">Other Sources</div>
-        <div class="ts-config-stats">
-          <span v-text="configDisplay.astrologyCount + ' astrology'"></span>
-          <span class="ts-config-sep">&middot;</span>
-          <span v-text="configDisplay.petCount + ' pets'"></span>
-          <span class="ts-config-sep">&middot;</span>
-          <span v-text="configDisplay.shopPurchaseCount + ' purchases'"></span>
+        <div class="ts-config-section">
+          <div class="ts-config-label">Prayers</div>
+          <div :class="configDisplay.prayerSummary === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.prayerSummary"></div>
+        </div>
+        <div class="ts-config-section">
+          <div class="ts-config-label">Synergy</div>
+          <div :class="configDisplay.synergy === 'None' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.synergy"></div>
+        </div>
+        <div class="ts-config-section">
+          <div class="ts-config-label">Agility</div>
+          <div :class="configDisplay.agilitySummary === 'No course loaded' ? 'ts-config-none' : 'ts-config-value'" v-text="configDisplay.agilitySummary"></div>
+        </div>
+        <div class="ts-config-section">
+          <div class="ts-config-label">Character</div>
+          <div class="ts-config-stats">
+            <span>Level <span v-text="configDisplay.skillLevel"></span></span>
+            <span class="ts-config-sep">&middot;</span>
+            <span>Abyssal <span v-text="configDisplay.abyssalSkillLevel"></span></span>
+            <span class="ts-config-sep">&middot;</span>
+            <span>Pool <span v-text="configDisplay.melvorPool"></span></span>
+            <span class="ts-config-sep">&middot;</span>
+            <span>Abyssal <span v-text="configDisplay.abyssalPool"></span></span>
+          </div>
+        </div>
+        <div class="ts-config-section">
+          <div class="ts-config-label">Other Sources</div>
+          <div class="ts-config-stats">
+            <span v-text="configDisplay.astrologyCount + ' astrology'"></span>
+            <span class="ts-config-sep">&middot;</span>
+            <span v-text="configDisplay.petCount + ' pets'"></span>
+            <span class="ts-config-sep">&middot;</span>
+            <span v-text="configDisplay.shopPurchaseCount + ' purchases'"></span>
+          </div>
         </div>
       </div>
     </div>

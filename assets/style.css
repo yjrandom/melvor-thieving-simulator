@@ -368,27 +368,6 @@
   font-style: italic;
 }
 
-.ts-equip-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 6px 16px;
-}
-
-.ts-equip-entry {
-  display: flex;
-  gap: 6px;
-  font-size: 0.85rem;
-}
-
-.ts-equip-slot {
-  color: #8899aa;
-  white-space: nowrap;
-}
-
-.ts-equip-item {
-  color: #c8c8c8;
-}
-
 .ts-config-stats {
   display: flex;
   flex-wrap: wrap;
@@ -399,6 +378,50 @@
 
 .ts-config-sep {
   color: #555;
+}
+
+/* Sim tab: loadout layout */
+
+.ts-loadout-layout {
+  display: flex;
+  gap: 16px;
+}
+
+.ts-loadout-equip {
+  flex-shrink: 0;
+}
+
+.ts-loadout-stats {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ts-equip-paperdoll--readonly {
+  padding: 0;
+  grid-template-columns: repeat(3, 80px);
+  gap: 4px;
+}
+
+.ts-equip-cell--readonly {
+  cursor: default;
+  min-height: 48px;
+  padding: 6px 4px;
+}
+
+.ts-equip-cell--readonly:hover {
+  border-color: #333;
+  background: #1a1a2e;
+}
+
+.ts-equip-cell--readonly.ts-equip-cell--filled:hover {
+  background: #1c2238;
+}
+
+.ts-equip-cell--readonly.ts-equip-cell--overridden:hover {
+  border-color: #c9a54e;
 }
 
 /* Equipment tab */
