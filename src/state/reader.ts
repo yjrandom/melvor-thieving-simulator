@@ -17,6 +17,7 @@ import type {
 } from '../calc/types';
 import { RealmName } from '../constants/game.constants';
 import {
+  THIEVING_SKILL_ID,
   ThievingBoostId,
   ThievingEquipmentSlotId,
   ThievingRealmId,
@@ -86,17 +87,22 @@ export function readAreas(thieving: Thieving): ThievingArea[] {
   );
 }
 
-/** Serializes game ModifierValue[] into plain data, preserving realm scope. */
+/**
+ * Serializes game ModifierValue[] into plain data, preserving realm scope.
+ * Filters out modifiers scoped to a non-thieving skill.
+ */
 function resolveModifiers(modValues: ModifierValue[] | undefined): Modifier[] {
   if (!modValues) return [];
-  return modValues.map((mv) => {
-    const resolved: Modifier = {
-      boostId: mv.modifier.id as ThievingBoostId,
-      value: mv.value,
-    };
-    if (mv.realm) resolved.realmId = mv.realm.id;
-    return resolved;
-  });
+  return modValues
+    .filter((mv) => !mv.skill || mv.skill.id === THIEVING_SKILL_ID)
+    .map((mv) => {
+      const resolved: Modifier = {
+        boostId: mv.modifier.id as ThievingBoostId,
+        value: mv.value,
+      };
+      if (mv.realm) resolved.realmId = mv.realm.id;
+      return resolved;
+    });
 }
 
 const THIEVING_SLOT_IDS = Object.values(ThievingEquipmentSlotId);
@@ -278,7 +284,11 @@ const THIEVING_BOOST_IDS = new Set<string>(Object.values(ThievingBoostId));
 /** Returns true if the item has at least one modifier relevant to thieving calculations. */
 function hasThievingModifier(modifiers: ModifierValue[] | undefined): boolean {
   if (!modifiers) return false;
-  return modifiers.some((mv) => THIEVING_BOOST_IDS.has(mv.modifier.id));
+  return modifiers.some(
+    (mv) =>
+      THIEVING_BOOST_IDS.has(mv.modifier.id) &&
+      (!mv.skill || mv.skill.id === THIEVING_SKILL_ID),
+  );
 }
 
 /**
@@ -380,17 +390,18 @@ export function readPotionOptions(game: Game): Potion[] {
 }
 
 /**
- * Enumerates all summoning synergies where at least one familiar is associated with thieving.
+ * Enumerates all summoning synergies whose tablets are consumed during thieving actions.
+ *
+ * Filters by `consumesOn` event type rather than familiar skill associations,
+ * because a familiar may list thieving as an associated skill yet belong to
+ * synergies whose effects target other skills entirely.
  *
  * @returns All thieving-relevant synergies with resolved modifiers.
  */
 export function readSynergyOptions(game: Game): SummoningSynergyInfo[] {
-  const thieving = game.thieving as unknown as AnySkill;
   return game.summoning.synergies
-    .filter(
-      (syn) =>
-        syn.summons[0].skills.includes(thieving) ||
-        syn.summons[1].skills.includes(thieving),
+    .filter((syn) =>
+      syn.consumesOn.some((matcher) => matcher.type === 'ThievingAction'),
     )
     .map((syn) => ({
       summon1Id: syn.summons[0].product.id,

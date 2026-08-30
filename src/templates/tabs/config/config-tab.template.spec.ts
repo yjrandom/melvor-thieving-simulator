@@ -182,14 +182,14 @@ describe('ConfigTabTemplate', () => {
         abyssalMasteryPoolPercent: 42.3,
       });
       const display = buildConfigDisplay(loadout);
-      expect(display.melvorPool).toBe('96.5%');
-      expect(display.abyssalPool).toBe('42.3%');
+      expect(display.melvorPool).toBe('96.50%');
+      expect(display.abyssalPool).toBe('42.30%');
     });
 
     it('should format zero mastery pool percentages', () => {
       const display = buildConfigDisplay(makeLoadout());
-      expect(display.melvorPool).toBe('0.0%');
-      expect(display.abyssalPool).toBe('0.0%');
+      expect(display.melvorPool).toBe('0.00%');
+      expect(display.abyssalPool).toBe('0.00%');
     });
 
     it('should pass through skill levels', () => {

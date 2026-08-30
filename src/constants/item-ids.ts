@@ -8,6 +8,8 @@ export enum ThievingCurrencyId {
   AP = 'melvorD:AP',
 }
 
+export const THIEVING_SKILL_ID = 'melvorD:Thieving';
+
 export enum ThievingRealmId {
   MELVOR = 'melvorD:Melvor',
   ABYSSAL = 'melvorItA:Abyssal',
